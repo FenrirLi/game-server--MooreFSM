@@ -1,78 +1,139 @@
 package objects
 
+import "../machine"
+
 type Player struct {
 
-	uuid string
-	table Table
-	seat int
-	prev_seat int
-	next_seat int
+	//用户id
+	Uuid string
 
-	is_online bool
-	state = None
-	self.vote_state = None
-	self.vote_timer = None
-	self.status = 0
-self.event = None
+	//桌子
+	Table Table
 
-self.machine = None
-Machine(self)
+	//座位号
+	Seat int
 
-# 累计数值
-self.total = 0
-self.kong_total = 0
-self.kong_exposed_total = 0
-self.kong_concealed_total = 0
-self.win_total_cnt = 0
-self.win_draw_cnt = 0
-self.win_discard_cnt = 0
-self.pao_cnt = 0
-self.is_owner = 0
+	//前一位置
+	Prev_seat int
 
-# 单局数值
-self.score = 0
-self.kong_score = 0
-self.cards_in_hand = []
-self.cards_group = []
-self.cards_discard = []
-self.cards_chow = []
-self.cards_pong = []
-self.cards_kong_exposed = []
-self.cards_kong_concealed = []
-self.cards_ready_hand = []
-self.cards_draw_niao = []
-self.cards_win = []
-self.kong_exposed_cnt = 0
-self.kong_concealed_cnt = 0
-self.kong_discard_cnt = 0
-self.kong_pong_cnt = 0
-self.cards_dic = {}
+	//下一位置
+	Next_seat int
 
-# 漏碰的牌
-self.miss_pong_cards = []
-# 漏胡的牌
-self.miss_win_cards = []
-# 过手胡分数
-self.miss_win_card_score = 0
-self.draw_card = 0
-self.draw_kong_exposed_card = 0
-# 胡的牌
-self.win_card = 0
-# 胡牌类型：点炮 自摸
-self.win_type = 0
-# 胡牌牌型：将将胡 | 碰碰胡 | 七小对 | 。。。
-self.win_flag = []
-self.offline_cmd_stack = []
+	//当前事件
+	Event string
 
-self.prompts = 0
-# 提示ID
-self.prompt_id = 0
-# 动作
-self.action_dict = {}
-self.action_id = 0
-self.action_weight = 0
-self.action_rule = None
-self.action_ref_cards = None
-self.action_op_card = None
+	//状态机
+	Machine machine.Machine
 
+	//状态
+	Status string
+
+	//====================================总局数值====================================
+	//总分
+	Total int
+
+	//杠动作分
+	Kong_total int
+
+	//明杠次数
+	Kong_exposed_total int
+
+	//暗杠次数
+	Kong_concealed_total int
+
+	//总获得分数
+	Win_total_cnt int
+
+	//自摸胡次数
+	Win_draw_cnt int
+
+	//点炮胡次数
+	Win_discard_cnt int
+
+	//点炮次数
+	Pao_cnt int
+
+	//是否房主
+	Is_owner bool
+
+	//====================================单轮数值====================================
+	//获得分数
+	Score int
+
+	//杠动作分
+	Kong_score int
+
+	//手牌
+	Cards_in_hand []int
+
+	//碰杠牌
+	Cards_group []int
+
+	//出过的牌
+	Cards_discard []int
+
+	//可碰的牌
+	Cards_pong []int
+
+	//可明杠的牌
+	Cards_kong_exposed []int
+
+	//可暗杠的牌
+	Cards_kong_concealed []int
+
+	//可听的牌
+	Cards_ready_hand []int
+
+	//可胡的牌
+	Cards_win []int
+
+	//明杠次数
+	Kong_exposed_cnt int
+
+	//暗杠次数
+	Kong_concealed_cnt int
+
+	//过路杠次数
+	Kong_pong_cnt int
+
+	//放杠次数
+	Kong_discard_cnt int
+
+	//听牌提示
+	Cards_dic []int
+
+	//漏碰的牌
+	Miss_pong_cards []int
+
+	//漏胡的牌
+	Miss_win_cards []int
+
+	//过手胡分数
+	Miss_win_card_score int
+
+	//抓的牌
+	Draw_card int
+
+	//过路杠的牌
+	Draw_kong_exposed_card int
+
+	//胡的牌
+	Win_card int
+
+	//胡牌类型：点炮 自摸
+	Win_type int
+
+	//胡牌牌型
+	Win_flag []string
+
+	//提示
+	Prompts []Prompt
+
+	//动作
+	Action Action
+
+}
+
+func (player *Player) Ready() {
+	player.Machine.Trigger(  )
 }

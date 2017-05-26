@@ -3,9 +3,9 @@ package objects
 type Prompt struct {
 
 	//行为id
-	id int
+	Id int
 
 	//权重
-	weight int
+	Weight int
 
 }
