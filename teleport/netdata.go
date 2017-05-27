@@ -16,7 +16,7 @@ const (
 // 定义数据传输结构
 type NetData struct {
 	// 消息体
-	Body interface{}
+	Body string
 	// 操作代号
 	Operation string
 	// 发信节点uid
@@ -29,7 +29,7 @@ type NetData struct {
 	Flag string
 }
 
-func NewNetData(from, to, operation string, flag string, body interface{}) *NetData {
+func NewNetData(from, to, operation string, flag string, body string) *NetData {
 	return &NetData{
 		From:      from,
 		To:        to,

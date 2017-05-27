@@ -5,7 +5,7 @@ package teleport
 // OpAndToAndFrom[0]参数为空时，系统将指定与对端相同的操作符
 // OpAndToAndFrom[1]参数为空时，系统将指定与对端为接收者
 // OpAndToAndFrom[2]参数为空时，系统将指定自身为发送者
-func ReturnData(body interface{}, OpAndToAndFrom ...string) *NetData {
+func ReturnData(body string, OpAndToAndFrom ...string) *NetData {
 	data := &NetData{
 		Status: SUCCESS,
 		Body:   body,

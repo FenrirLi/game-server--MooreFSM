@@ -17,5 +17,6 @@ func (*Heartbeat) Process(receive *teleport.NetData) *teleport.NetData {
 	fmt.Println(receive.Status)
 	fmt.Println(receive.Flag)
 
-	return teleport.ReturnData("confirm heartbeat",teleport.HEARTBEAT,receive.From)
+	return nil
+	//return teleport.ReturnData("confirm heartbeat",teleport.HEARTBEAT,receive.From)
 }

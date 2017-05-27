@@ -12,6 +12,7 @@ func main() {
 	//注册请求处理函数
 	serverHandlers := teleport.API{
 		"CreateRoom": new(handlers.CreateRoom),
+		"EnterRoom": new(handlers.EnterRoom),
 
 		teleport.HEARTBEAT : new(handlers.Heartbeat),
 		teleport.IDENTITY : new(handlers.Identity),
