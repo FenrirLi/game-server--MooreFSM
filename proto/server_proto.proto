@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+message CreateRoomRequest {
+    string uuid = 1;
+    int32  round = 2;
+}
+
+message CreateRoomResponse {
+    int32 room_id = 1;
+}
+
+message EnterRoomRequest {
+    int32 room_id = 1;
+}
+
+message EnterRoomResponse {
+    int32 room_id = 1;
+}

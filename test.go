@@ -1,14 +1,32 @@
 package main
 
 import (
-	"./machine"
-	"./global"
+	"./proto"
+	"log"
+	"github.com/golang/protobuf/proto"
 )
 
-// 有标识符UID的demo，保证了客户端链接唯一性
 func main() {
-	table := machine.CreateTable( "1" )
-	new_machine := machine.NewTableMachine( table, nil, nil )
-	table.Machine = &new_machine
-	global.GLOBAL_TABLE[111] = &table
+	create_req := &create_room.CreateRoomRequest{"1111",2}
+
+	// 进行编码
+	data, err := proto.Marshal(create_req)
+	if err != nil {
+		log.Fatal("marshaling error: ", err)
+	}
+	log.Println(data)
+
+	// 进行解码
+	new_req := &create_room.CreateRoomRequest{}
+	err = proto.Unmarshal(data, new_req)
+	if err != nil {
+		log.Fatal("unmarshaling error: ", err)
+	}
+
+	log.Printf("uid:%s    round:%d;",new_req.Uuid,new_req.Round)
+
+	// 测试结果
+	if create_req.String() != new_req.String() {
+		log.Fatalf("data mismatch %q != %q", create_req.String(), new_req.String())
+	}
 }

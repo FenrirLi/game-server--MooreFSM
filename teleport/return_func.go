@@ -5,7 +5,7 @@ package teleport
 // OpAndToAndFrom[0]参数为空时，系统将指定与对端相同的操作符
 // OpAndToAndFrom[1]参数为空时，系统将指定与对端为接收者
 // OpAndToAndFrom[2]参数为空时，系统将指定自身为发送者
-func ReturnData(body string, OpAndToAndFrom ...string) *NetData {
+func ReturnData(body []byte, OpAndToAndFrom ...string) *NetData {
 	data := &NetData{
 		Status: SUCCESS,
 		Body:   body,
@@ -23,7 +23,7 @@ func ReturnData(body string, OpAndToAndFrom ...string) *NetData {
 }
 
 // 返回错误，receive建议为直接接收到的*NetData
-func ReturnError(receive *NetData, status int, msg string, nodeuid ...string) *NetData {
+func ReturnError(receive *NetData, status int, msg []byte, nodeuid ...string) *NetData {
 	receive.Status = status
 	receive.Body = msg
 	receive.From = ""

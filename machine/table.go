@@ -86,7 +86,7 @@ func CreateTable( oid string ) Table {
 	id := rand.Intn(89999)
 	id += 10000
 	return Table{
-		TableId:111111,
+		TableId:id,
 		OwnerId: oid,
 		CreateTime: time.Now(),
 		Config: NewTableConfig(),

@@ -40,7 +40,7 @@ type Teleport interface {
 	// *以客户端模式运行，port为空时默认等于常量DEFAULT_PORT
 	Client(serverAddr string, port string, isShort ...bool)
 	// *主动推送信息，不写nodeuid默认随机发送给一个节点
-	Request(body string, operation string, flag string, nodeuid ...string)
+	Request(body []byte, operation string, flag string, nodeuid ...string)
 	// 指定自定义的应用程序API
 	SetAPI(api API) Teleport
 	// 断开连接，参数为空则断开所有连接，服务器模式下还将停止监听
@@ -141,7 +141,7 @@ func (self *TP) SetAPI(api API) Teleport {
 }
 
 // *主动推送信息，直到有连接出现开始发送，不写nodeuid默认随机发送给一个节点
-func (self *TP) Request(body string, operation string, flag string, nodeuid ...string) {
+func (self *TP) Request(body []byte, operation string, flag string, nodeuid ...string) {
 	var conn *Connect
 	var uid string
 	if len(nodeuid) == 0 {
@@ -370,10 +370,10 @@ func (self *TP) apiHandle() {
 			if !ok {
 				// log.Printf("%+v", req)
 				if self.mode == SERVER {
-					self.autoErrorHandle(req, LLLEGAL, "服务器 ("+self.getConn(to).LocalAddr().String()+") 不存在API接口: "+req.Operation+"！", to)
+					//self.autoErrorHandle(req, LLLEGAL, "服务器 ("+self.getConn(to).LocalAddr().String()+") 不存在API接口: "+req.Operation+"！", to)
 					log.Printf("客户端 %v (%v) 正在请求不存在的API接口: %v！", to, self.getConnAddr(to), req.Operation)
 				} else {
-					self.autoErrorHandle(req, LLLEGAL, "客户端 "+from+" ("+self.getConn(to).LocalAddr().String()+") 不存在API接口: "+req.Operation+"！", to)
+					//self.autoErrorHandle(req, LLLEGAL, "客户端 "+from+" ("+self.getConn(to).LocalAddr().String()+") 不存在API接口: "+req.Operation+"！", to)
 					log.Printf("服务器 (%v) 正在请求不存在的API接口: %v！", self.getConnAddr(to), req.Operation)
 				}
 				return
@@ -393,7 +393,7 @@ func (self *TP) apiHandle() {
 
 			// 若指定节点连接不存在，则向原请求端返回错误
 			if conn = self.getConn(resp.To); conn == nil {
-				self.autoErrorHandle(req, FAILURE, "", to)
+				self.autoErrorHandle(req, FAILURE, nil, to)
 				return
 			}
 
@@ -416,7 +416,7 @@ func (self *TP) apiHandle() {
 	}
 }
 
-func (self *TP) autoErrorHandle(data *NetData, status int, msg string, reqFrom string) bool {
+func (self *TP) autoErrorHandle(data *NetData, status int, msg []byte, reqFrom string) bool {
 	oldConn := self.getConn(reqFrom)
 	if oldConn == nil {
 		return false

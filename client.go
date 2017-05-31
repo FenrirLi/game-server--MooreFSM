@@ -6,6 +6,9 @@ import (
 	"./handlers"
 	"fmt"
 	//"time"
+	"github.com/golang/protobuf/proto"
+	"log"
+	"./proto"
 )
 
 var table_id string
@@ -15,6 +18,8 @@ func main() {
 
 	debug.Debug = true
 
+	uid := "C1"
+
 	//注册请求处理函数
 	clientHandlers := teleport.API{
 		"CreateRoomReturn" : new(ClientHeartBeat),
@@ -23,12 +28,18 @@ func main() {
 	}
 
 	//启动客户端
-	tp := teleport.New().SetUID("C1", "abc").SetAPI( clientHandlers )
+	tp := teleport.New().SetUID(uid, "abc").SetAPI( clientHandlers )
 	tp.Client("127.0.0.1", ":20125")
 
-	//tp.Request("客户端请求创建房间", "CreateRoom", "create_room_flag")
+	req := &server_proto.CreateRoomRequest{uid,4}
+	data, err := proto.Marshal(req)
+	if err != nil {
+		log.Fatal("create room request error: ", err)
+	}
+
+	tp.Request(data, "CreateRoom", "create_room_flag")
 	//time.Sleep(5*time.Second)
-	tp.Request("111111", "EnterRoom", "enter_room_flag")
+	//tp.Request("111111", "EnterRoom", "enter_room_flag")
 	select {}
 }
 
@@ -36,14 +47,20 @@ type ClientHeartBeat struct{}
 func (*ClientHeartBeat) Process(receive *teleport.NetData) *teleport.NetData {
 
 	fmt.Println("=============room create return===============")
-	fmt.Println(receive.Body)
-	fmt.Println(receive.Operation)
-	fmt.Println(receive.From)
-	fmt.Println(receive.To)
-	fmt.Println(receive.Status)
-	fmt.Println(receive.Flag)
 
-	table_id = receive.Body
+	// 进行解码
+	response := &server_proto.CreateRoomResponse{}
+	err := proto.Unmarshal(receive.Body, response)
+	if err != nil {
+		log.Fatal("create room response error: ", err)
+	}
+	fmt.Println(response.RoomId)
 
-	return nil
+	request := &server_proto.EnterRoomRequest{response.RoomId}
+	data, err := proto.Marshal( request )
+	if err != nil {
+		log.Fatal("enter room request error: ", err)
+	}
+
+	return teleport.ReturnData( data, "EnterRoom" )
 }
