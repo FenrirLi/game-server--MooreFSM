@@ -10,9 +10,9 @@ type PlayerMachine struct {
 
 }
 
-func NewPlayerMachine( player Player, current PlayerStatus, last PlayerStatus ) PlayerMachine {
+func NewPlayerMachine( player *Player, current PlayerStatus, last PlayerStatus ) PlayerMachine {
 	return PlayerMachine{
-		Owner: &player,
+		Owner: player,
 		CurrentStatus: current,
 		LastStatus: last,
 	}

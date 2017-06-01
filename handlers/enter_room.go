@@ -24,25 +24,29 @@ func (*EnterRoom) Process(receive *teleport.NetData) *teleport.NetData {
 		log.Fatal("enter room request error: ", err)
 	}
 
+	//房间存在
 	if table,ok := global.GLOBAL_TABLE[int(request.RoomId)]; ok {
 		log.Println("enter room ",table.TableId," success")
 
+		//创建玩家,依据桌子房间（桌子）情况分配座位
 		player := machine.CreatePlayer( uid, table )
-		player_machine := machine.NewPlayerMachine( player, machine.PlayerEventStatus["EVENT_READY"], nil )
+		//创建玩家的状态机
+		player_machine := machine.NewPlayerMachine( &player, machine.PlayerEventStatus["EVENT_READY"], nil )
 		player.Machine = &player_machine
-
+		//记录玩家信息到桌子
 		table.PlayerDict[player.Seat] = player
 
 		for key, value := range table.PlayerDict {
 			log.Println("Key:", key, "Value:", value.Uid)
 		}
 
+		//是否全部准备
 		if table.IsAllReady() {
 			log.Println("all player are ready for game")
 			table.Machine.Trigger( &machine.TableReadyStatus{} )
 		}
 
-	}else {
+	} else {
 		//return teleport.ReturnData(nil,"CreateRoomReturn",receive.From)
 	}
 

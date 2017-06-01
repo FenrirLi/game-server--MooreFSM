@@ -32,7 +32,6 @@ func (this *TableReadyStatus) Enter( table *Table ) {
 	//该状态下规则检测
 	log.Println("=====  TABLE_RULE_READY checking...  =====")
 	ManagerCondition( table, "TABLE_RULE_READY" )
-	log.Println("=====  TABLE_RULE_READY check over  =====")
 
 }
 func (this *TableReadyStatus) Execute( table *Table, event TableStatus ) {
@@ -51,6 +50,17 @@ func (this *TableReadyStatus) NextStatus( table *Table ) {
 type TableDealStatus struct{}
 func (this *TableDealStatus) Enter( table *Table ) {
 	log.Println("-----table enter deal status-----")
+	//开始发牌
+	//todo
+
+	for position, player := range table.PlayerDict {
+		player.Cards_in_hand = []int{position,1,2,3,4,5,6,7,8,9}
+		table.PlayerDict[position] = player
+	}
+
+	//该状态下规则检测
+	log.Println("=====  TABLE_RULE_DEAL checking...  =====")
+	ManagerCondition( table, "TABLE_RULE_DEAL" )
 }
 func (this *TableDealStatus) Execute( table *Table, event TableStatus ) {
 	log.Println("-----table execute deal status-----")
@@ -60,4 +70,7 @@ func (this *TableDealStatus) Exit( table *Table ) {
 }
 func (this *TableDealStatus) NextStatus( table *Table ) {
 	log.Println("-----table next deal status-----")
+	for _, player := range table.PlayerDict {
+		log.Println(player.Cards_in_hand)
+	}
 }

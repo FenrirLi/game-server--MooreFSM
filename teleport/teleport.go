@@ -21,15 +21,15 @@ const (
 	// 心跳操作符
 	HEARTBEAT = "+heartbeat+"
 	// 默认包头
-	DEFAULT_PACK_HEADER = "henrylee2cn"
+	DEFAULT_PACK_HEADER = "Fenrir"
 	// SERVER默认UID
 	DEFAULT_SERVER_UID = "server"
 	// 默认端口
 	DEFAULT_PORT = ":8080"
 	// 服务器默认心跳间隔时长
-	DEFAULT_TIMEOUT_S = 20e9
+	DEFAULT_TIMEOUT_S = 60e9
 	// 客户端默认心跳间隔时长
-	DEFAULT_TIMEOUT_C = 15e9
+	DEFAULT_TIMEOUT_C = 30e9
 	// 等待连接的轮询时长
 	LOOP_TIMEOUT = 1e9
 )
