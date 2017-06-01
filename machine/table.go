@@ -4,6 +4,8 @@ import (
 	"time"
 	"container/list"
 	"math/rand"
+	"log"
+	"reflect"
 )
 
 
@@ -86,7 +88,7 @@ func CreateTable( oid string ) Table {
 	id := rand.Intn(89999)
 	id += 10000
 	return Table{
-		TableId:id,
+		TableId:111111,
 		OwnerId: oid,
 		CreateTime: time.Now(),
 		Config: NewTableConfig(),
@@ -119,16 +121,17 @@ func (self *Table) NextRound() Table {
 func (this *Table) IsAllReady() bool {
 	//人未到齐
 	if len( this.PlayerDict ) != this.Config.Max_chairs {
+		log.Println("人不齐")
 		return false
 	}
 	//有用户未准备
 	for _,player := range this.PlayerDict {
-		if player.Status != PlayerEventStatus["EVENT_READY"] {
+		if reflect.DeepEqual( player.Status, PlayerEventStatus["EVENT_READY"] ) {
+			log.Println("未准备")
 			return false
 		}
 	}
-	this.Machine.Trigger( &TableReadyStatus{} )
-	return false
+	return true
 }
 
 func (self *Table) IsAllActed() bool {

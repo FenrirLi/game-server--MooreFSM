@@ -1,7 +1,7 @@
 package machine
 
 import (
-	"fmt"
+	"log"
 )
 
 var TableRulesGroup = map[string][]TableRules{
@@ -13,18 +13,18 @@ var TableRulesGroup = map[string][]TableRules{
 }
 
 //===========================TableRulesManager===========================
-type TableRulesManager struct {}
-func (this *TableRulesManager) condition( table Table, rule_group string ) bool {
+//type TableRulesManager struct {}
+func ManagerCondition( table *Table, rule_group string ) bool {
 	//依据检验的组对规则进行遍历
 	if rules_array, ok := TableRulesGroup[rule_group]; ok {
 		for _,rule := range rules_array {
 			//满足规则则进行处理
-			if rule.Condition( table ) {
-				rule.Action( table )
+			if rule.Condition( *table ) {
+				rule.Action( *table )
 			}
 		}
 	} else {
-		fmt.Println("Manager : rule_group Not Found")
+		log.Println("Manager : rule_group Not Found")
 	}
 
 	table.Machine.CurrentStatus.NextStatus( table )

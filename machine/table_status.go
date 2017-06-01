@@ -1,17 +1,18 @@
 package machine
 
-type TableStatus interface {
-	Enter( table Table )
-	Execute( table Table, event TableStatus )
-	Exit( table Table )
-	NextStatus( table Table )
-}
+import "log"
 
+type TableStatus interface {
+	Enter( table *Table )
+	Execute( table *Table, event TableStatus )
+	Exit( table *Table )
+	NextStatus( table *Table )
+}
 
 //===========================TableReadyStatus===========================
 type TableReadyStatus struct{}
-func (this *TableReadyStatus) Enter( table Table ) {
-
+func (this *TableReadyStatus) Enter( table *Table ) {
+	log.Println("-----table enter ready status-----")
 	//定位上下家
 	for seat,player := range table.PlayerDict {
 		//下家
@@ -28,10 +29,35 @@ func (this *TableReadyStatus) Enter( table Table ) {
 		}
 		player.Prev_seat = prev_seat
 	}
+	//该状态下规则检测
+	log.Println("=====  TABLE_RULE_READY checking...  =====")
+	ManagerCondition( table, "TABLE_RULE_READY" )
+	log.Println("=====  TABLE_RULE_READY check over  =====")
 
 }
-func (this *TableReadyStatus) Execute( table Table, event TableStatus ) {}
-func (this *TableReadyStatus) Exit( table Table ) {}
-func (this *TableReadyStatus) NextStatus( table Table ) {
-	//table.Machine.Trigger( DealState() )
+func (this *TableReadyStatus) Execute( table *Table, event TableStatus ) {
+	log.Println("-----table execute ready status-----")
+}
+func (this *TableReadyStatus) Exit( table *Table ) {
+	log.Println("-----table exit ready status-----")
+}
+func (this *TableReadyStatus) NextStatus( table *Table ) {
+	log.Println("-----table next ready status-----")
+	table.Machine.Trigger( &TableDealStatus{} )
+}
+
+
+//===========================TableDealStatus===========================
+type TableDealStatus struct{}
+func (this *TableDealStatus) Enter( table *Table ) {
+	log.Println("-----table enter deal status-----")
+}
+func (this *TableDealStatus) Execute( table *Table, event TableStatus ) {
+	log.Println("-----table execute deal status-----")
+}
+func (this *TableDealStatus) Exit( table *Table ) {
+	log.Println("-----table exit deal status-----")
+}
+func (this *TableDealStatus) NextStatus( table *Table ) {
+	log.Println("-----table next deal status-----")
 }

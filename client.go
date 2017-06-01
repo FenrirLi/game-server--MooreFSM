@@ -4,10 +4,9 @@ import (
 	"./teleport"
 	"./teleport/debug"
 	"./handlers"
-	"fmt"
+	"log"
 	//"time"
 	"github.com/golang/protobuf/proto"
-	"log"
 	"./proto"
 )
 
@@ -46,21 +45,15 @@ func main() {
 type ClientHeartBeat struct{}
 func (*ClientHeartBeat) Process(receive *teleport.NetData) *teleport.NetData {
 
-	fmt.Println("=============room create return===============")
+	log.Println("=============room create return===============")
 
 	// 进行解码
 	response := &server_proto.CreateRoomResponse{}
-	err := proto.Unmarshal(receive.Body, response)
-	if err != nil {
-		log.Fatal("create room response error: ", err)
-	}
-	fmt.Println(response.RoomId)
+	server_proto.MessageDecode( receive.Body, response )
+	log.Println(response.RoomId)
 
 	request := &server_proto.EnterRoomRequest{response.RoomId}
-	data, err := proto.Marshal( request )
-	if err != nil {
-		log.Fatal("enter room request error: ", err)
-	}
+	data := server_proto.MessageEncode(request)
 
 	return teleport.ReturnData( data, "EnterRoom" )
 }

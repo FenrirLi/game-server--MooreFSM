@@ -1,7 +1,7 @@
 package machine
 
 import (
-	"fmt"
+	"log"
 	"reflect"
 )
 
@@ -19,7 +19,7 @@ func (this *PlayerInitStatus) Execute( player Player, event PlayerStatus ) {
 	if event == PlayerEventStatus["EVENT_READY"] {
 
 	} else {
-		fmt.Println("init_status error call event "+reflect.TypeOf(event).Name())
+		log.Println("init_status error call event "+reflect.TypeOf(event).Name())
 	}
 
 }

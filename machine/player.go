@@ -3,10 +3,10 @@ package machine
 type Player struct {
 
 	//用户id
-	Uuid string
+	Uid string
 
 	//桌子
-	Table Table
+	Table *Table
 
 	//座位号
 	Seat int
@@ -50,9 +50,6 @@ type Player struct {
 
 	//点炮次数
 	Pao_cnt int
-
-	//是否房主
-	Is_owner bool
 
 	//====================================单轮数值====================================
 	//获得分数
@@ -130,6 +127,35 @@ type Player struct {
 	//动作
 	Action Action
 
+}
+
+func CreatePlayer( uid string, table *Table ) Player {
+	var seat int
+	//查找该用户是不是已经在成员列表
+	flag := false
+	for seat = 0; seat < table.Config.Max_chairs; seat++ {
+		data, ok := table.PlayerDict[seat]
+		if ok && data.Uid == uid {
+			flag = true
+			break
+		}
+	}
+	//不在成员列表则取最低座位号
+	if !flag {
+		for seat = 0; seat < table.Config.Max_chairs; seat++ {
+			_, ok := table.PlayerDict[seat]
+			if !ok {
+				break
+			}
+		}
+	}
+
+	return Player{
+		Uid: uid,
+		Table: table,
+		//需要修正 @debug
+		Seat: seat,
+	}
 }
 
 func (self *Player) Ready() {

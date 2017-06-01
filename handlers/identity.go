@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"../teleport"
-	"fmt"
+	"log"
 )
 
 type Identity struct{}
 
 func (*Identity) Process(receive *teleport.NetData) *teleport.NetData {
-	fmt.Println("=============identity===========")
+	log.Println("=============identity===========")
 	return nil
 }

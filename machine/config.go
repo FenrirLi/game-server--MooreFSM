@@ -4,5 +4,5 @@ type TableConfig struct {
 	Max_chairs int
 }
 func NewTableConfig() TableConfig{
-	return TableConfig{4}
+	return TableConfig{2}
 }
