@@ -14,7 +14,7 @@ var TableRulesGroup = map[string][]TableRules{
 
 //===========================TableRulesManager===========================
 //type TableRulesManager struct {}
-func ManagerCondition( table *Table, rule_group string ) bool {
+func TableManagerCondition( table *Table, rule_group string ) bool {
 	//依据检验的组对规则进行遍历
 	if rules_array, ok := TableRulesGroup[rule_group]; ok {
 		for _,rule := range rules_array {
@@ -27,6 +27,6 @@ func ManagerCondition( table *Table, rule_group string ) bool {
 		log.Println("Manager : rule_group Not Found")
 	}
 
-	table.Machine.CurrentStatus.NextStatus( table )
+	table.Machine.CurrentState.NextState( table )
 	return false
 }

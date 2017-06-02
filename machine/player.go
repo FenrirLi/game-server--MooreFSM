@@ -23,8 +23,8 @@ type Player struct {
 	//状态机
 	Machine *PlayerMachine
 
-	//当前状态
-	Status PlayerStatus
+	//是否在线
+	OnlineState bool
 
 	//====================================总局数值====================================
 	//总分
@@ -159,5 +159,5 @@ func CreatePlayer( uid string, table *Table ) Player {
 }
 
 func (self *Player) Ready() {
-	self.Machine.Trigger( &PlayerReadyStatus{} )
+	self.Machine.Trigger( &PlayerReadyState{} )
 }

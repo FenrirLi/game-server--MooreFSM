@@ -29,9 +29,6 @@ type Table struct {
 	//状态机
 	Machine *TableMachine
 
-	//当前状态
-	Status TableStatus
-
 	//庄家位置
 	DealerSeat int
 
@@ -44,10 +41,11 @@ type Table struct {
 	//当前出牌位置
 	DiscardSeat int
 
-	//event map[int]
+	//当前执行事件
+	Event string
 
 	//剩余卡牌
-	CardsRest list.List
+	CardsRest *list.List
 
 	//获得提示的玩家位置
 	PlayerPrompts map[int] bool
@@ -126,7 +124,7 @@ func (this *Table) IsAllReady() bool {
 	}
 	//有用户未准备
 	for _,player := range this.PlayerDict {
-		if reflect.DeepEqual( player.Status, PlayerEventStatus["EVENT_READY"] ) {
+		if !reflect.DeepEqual( player.Machine.CurrentState, &PlayerReadyState{} ) {
 			log.Println("未准备")
 			return false
 		}

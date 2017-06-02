@@ -4,30 +4,30 @@ type TableMachine struct {
 
 	Owner *Table
 
-	CurrentStatus TableStatus
+	CurrentState TableState
 
-	LastStatus TableStatus
+	LastState TableState
 
 }
 
-func NewTableMachine( table *Table, current TableStatus, last TableStatus ) TableMachine {
+func NewTableMachine( table *Table, current TableState, last TableState ) TableMachine {
 	return TableMachine{
 		Owner: table,
-		CurrentStatus: current,
-		LastStatus: last,
+		CurrentState: current,
+		LastState: last,
 	}
 }
 
-func (self *TableMachine) Trigger( status TableStatus ) {
-	if self.CurrentStatus != nil {
-		self.CurrentStatus.Exit( self.Owner )
-		self.LastStatus = self.CurrentStatus
+func (self *TableMachine) Trigger( state TableState ) {
+	if self.CurrentState != nil {
+		self.CurrentState.Exit( self.Owner )
+		self.LastState = self.CurrentState
 	}
-	self.CurrentStatus = status
-	self.CurrentStatus.Enter( self.Owner )
+	self.CurrentState = state
+	self.CurrentState.Enter( self.Owner )
 }
 
-func (self *TableMachine) BackToLastStatus() {
+func (self *TableMachine) BackToLastState() {
 
 }
 
@@ -35,6 +35,6 @@ func (self *TableMachine) Execute() {
 
 }
 
-func (self *TableMachine) NextStatus() {
+func (self *TableMachine) NextState() {
 
 }
