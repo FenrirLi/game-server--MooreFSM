@@ -48,10 +48,10 @@ type Table struct {
 	CardsRest *list.List
 
 	//获得提示的玩家位置
-	PlayerPrompts map[int] bool
+	PlayerPrompts []int
 
 	//做出行为选择的玩家位置
-	PlayerActions map[int] bool
+	PlayerActions map[int] Action
 
 	//牌局记录
 	Replay list.List
@@ -139,12 +139,18 @@ func (self *Table) IsAllActed() bool {
 
 //清除当前行为提示玩家记录
 func (self *Table) ClearPrompts() {
-	self.PlayerPrompts = make(map[int] bool)
+	self.PlayerPrompts = []int{}
+	for _,player := range self.PlayerDict {
+		player.DelPrompt()
+	}
 }
 
 //清除当前行为选择玩家记录
 func (self *Table) ClearActions() {
-	self.PlayerActions = make(map[int] bool)
+	self.PlayerActions = map[int]Action{}
+	for _,player := range self.PlayerDict {
+		player.DelAction()
+	}
 }
 
 //过滤行为数组，去除低优先级操作

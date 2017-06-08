@@ -3,7 +3,6 @@ package handlers
 import (
 	"../teleport"
 	"log"
-	"../global"
 	"../proto"
 	"github.com/golang/protobuf/proto"
 	"../machine"
@@ -25,7 +24,7 @@ func (*EnterRoom) Process(receive *teleport.NetData) *teleport.NetData {
 	}
 
 	//房间存在
-	if table,ok := global.GLOBAL_TABLE[int(request.RoomId)]; ok {
+	if table,ok := machine.GLOBAL_TABLE[int(request.RoomId)]; ok {
 		log.Println("enter room ",table.TableId," success")
 
 		//创建玩家,依据桌子房间（桌子）情况分配座位
@@ -35,6 +34,8 @@ func (*EnterRoom) Process(receive *teleport.NetData) *teleport.NetData {
 		player.Machine = &player_machine
 		//记录玩家信息到桌子
 		table.PlayerDict[player.Seat] = player
+		//记录全局用户
+		machine.GLOBAL_USER[player.Uid] = &player
 
 		for key, value := range table.PlayerDict {
 			log.Println("Key:", key, "Value:", value.Uid)

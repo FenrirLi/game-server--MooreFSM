@@ -4,7 +4,6 @@ import (
 	"../teleport"
 	"log"
 	"../machine"
-	"../global"
 	"../proto"
 )
 
@@ -24,7 +23,7 @@ func (*CreateRoom) Process(receive *teleport.NetData) *teleport.NetData {
 	table := machine.CreateTable( receive.From )
 	new_machine := machine.NewTableMachine( &table, nil, nil )
 	table.Machine = &new_machine
-	global.GLOBAL_TABLE[table.TableId] = &table
+	machine.GLOBAL_TABLE[table.TableId] = &table
 
 	//返回
 	response := &server_proto.CreateRoomResponse{int32(table.TableId)}

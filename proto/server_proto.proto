@@ -16,3 +16,12 @@ message EnterRoomRequest {
 message EnterRoomResponse {
     int32 room_id = 1;
 }
+
+message DiscardRequest {
+    int32 card = 1;
+}
+
+message DiscardResponse {
+    string uuid = 1;
+    int32 card = 2;
+}

@@ -8,6 +8,10 @@ import (
 	//"time"
 	"github.com/golang/protobuf/proto"
 	"./proto"
+	"bufio"
+	"os"
+	"strconv"
+	"fmt"
 )
 
 var table_id string
@@ -22,6 +26,7 @@ func main() {
 	//注册请求处理函数
 	clientHandlers := teleport.API{
 		"CreateRoomReturn" : new(ClientHeartBeat),
+		"DiscardResponse" : new(DiscardResponse),
 		//teleport.HEARTBEAT : new(ClientHeartBeat),
 		teleport.IDENTITY : new(handlers.Identity),
 	}
@@ -37,8 +42,32 @@ func main() {
 	}
 
 	tp.Request(data, "CreateRoom", "create_room_flag")
-	//time.Sleep(5*time.Second)
-	//tp.Request("111111", "EnterRoom", "enter_room_flag")
+
+	//指令
+	running := true
+	var inp []byte
+	var data2 []byte
+	var order string
+	var card int
+	var req2 = &server_proto.DiscardRequest{}
+	for running {
+		fmt.Println("please input :")
+		reader := bufio.NewReader(os.Stdin)
+		inp, _, _ = reader.ReadLine()
+		order = string(inp)
+		if order == "stop"{
+			running = false
+		} else if order == "discard" {
+			inp, _, _ = reader.ReadLine()
+			order = string(inp)
+			card, _ = strconv.Atoi(order)
+			req2.Card = int32(card)
+			data2, _ = proto.Marshal(req2)
+			tp.Request(data2, "Discard", "discard_flag")
+			log.Println("discard ",card)
+		}
+	}
+
 	select {}
 }
 
@@ -56,4 +85,16 @@ func (*ClientHeartBeat) Process(receive *teleport.NetData) *teleport.NetData {
 	data := server_proto.MessageEncode(request)
 
 	return teleport.ReturnData( data, "EnterRoom" )
+}
+
+type DiscardResponse struct{}
+func (*DiscardResponse) Process(receive *teleport.NetData) *teleport.NetData {
+
+	log.Println("=============DiscardResponse===============")
+
+	// 进行解码
+	response := &server_proto.DiscardResponse{}
+	server_proto.MessageDecode( receive.Body, response )
+	log.Println(response.Uuid," discard ",response.Card)
+	return nil
 }

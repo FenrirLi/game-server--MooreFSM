@@ -1,5 +1,13 @@
 package machine
 
+import (
+	"log"
+	"reflect"
+	"container/list"
+	"../proto"
+	"../global"
+)
+
 type Player struct {
 
 	//用户id
@@ -12,10 +20,10 @@ type Player struct {
 	Seat int
 
 	//前一位置
-	Prev_seat int
+	PrevSeat int
 
 	//下一位置
-	Next_seat int
+	NextSeat int
 
 	//当前事件
 	Event string
@@ -31,100 +39,104 @@ type Player struct {
 	Total int
 
 	//杠动作分
-	Kong_total int
+	KongTotal int
 
 	//明杠次数
-	Kong_exposed_total int
+	KongExposedTotal int
 
 	//暗杠次数
-	Kong_concealed_total int
+	KongConcealedTotal int
 
 	//总获得分数
-	Win_total_cnt int
+	WinTotalCnt int
 
 	//自摸胡次数
-	Win_draw_cnt int
+	WinDrawCnt int
 
 	//点炮胡次数
-	Win_discard_cnt int
+	WinDiscardCnt int
 
 	//点炮次数
-	Pao_cnt int
+	PaoCnt int
 
 	//====================================单轮数值====================================
 	//获得分数
 	Score int
 
 	//杠动作分
-	Kong_score int
+	KongScore int
 
 	//手牌
-	Cards_in_hand []int
+	CardsInHand [14]int
 
 	//碰杠牌
-	Cards_group []int
+	CardsGroup []int
 
 	//出过的牌
-	Cards_discard []int
+	CardsDiscard *list.List
 
 	//可碰的牌
-	Cards_pong []int
+	CardsPong []int
 
 	//可明杠的牌
-	Cards_kong_exposed []int
+	CardsKongExposed []int
 
 	//可暗杠的牌
-	Cards_kong_concealed []int
+	CardsKongConcealed []int
 
 	//可听的牌
-	Cards_ready_hand []int
+	CardsReadyHand []int
 
 	//可胡的牌
-	Cards_win []int
+	CardsWin []int
 
 	//明杠次数
-	Kong_exposed_cnt int
+	KongExposedCnt int
 
 	//暗杠次数
-	Kong_concealed_cnt int
+	KongConcealedCnt int
 
 	//过路杠次数
-	Kong_pong_cnt int
+	KongPongCnt int
 
 	//放杠次数
-	Kong_discard_cnt int
+	KongDiscardCnt int
 
 	//听牌提示
-	Cards_dic []int
+	CardsDic []int
 
 	//漏碰的牌
-	Miss_pong_cards []int
+	MissPongCards []int
 
 	//漏胡的牌
-	Miss_win_cards []int
+	MissWinCards []int
 
 	//过手胡分数
-	Miss_win_card_score int
+	MissWinCardScore int
 
 	//抓的牌
-	Draw_card int
+	DrawCard int
 
 	//过路杠的牌
-	Draw_kong_exposed_card int
+	DrawKongExposedCard int
 
 	//胡的牌
-	Win_card int
+	WinCard int
 
 	//胡牌类型：点炮 自摸
-	Win_type int
+	WinType int
 
 	//胡牌牌型
-	Win_flag []string
+	WinFlag []string
 
-	//提示
-	Prompts []Prompt
+	//是否有提示
+	HasPrompt bool
+	//提示自增id
+	PromptId int
 
-	//动作
+	//可执行动作集合
+	ActionDict map[int]Action
+	//选择的动作
 	Action Action
 
 }
@@ -155,9 +167,62 @@ func CreatePlayer( uid string, table *Table ) Player {
 		Table: table,
 		//需要修正 @debug
 		Seat: seat,
+		CardsDiscard:list.New(),
 	}
 }
 
-func (self *Player) Ready() {
-	self.Machine.Trigger( &PlayerReadyState{} )
+//func (self *Player) Ready() {
+//	self.Machine.Trigger( &PlayerReadyState{} )
+//}
+
+//去除玩家提示信息
+func ( self *Player ) DelPrompt() {
+	self.HasPrompt = false
+	self.PromptId = 0
+	self.ActionDict = map[int]Action{}
 }
+
+//去除玩家动作信息
+func ( self *Player ) DelAction() {
+	self.Action = Action{}
+}
+
+func ( self *Player ) Discard( card int ) {
+	log.Println("      ",self.Uid,"出牌",card)
+	//如果用户是在没有处理操作提示的情况下出的牌
+	if !reflect.DeepEqual( self.Machine.CurrentState, &PlayerPromptState{} ) {
+		self.DelPrompt()
+		self.Table.ClearPrompts()
+		self.Table.Machine.NextState()
+	}
+
+	//出牌
+	self.Table.DiscardSeat = self.Seat
+	for k,v := range self.CardsInHand {
+		if v == card {
+			self.CardsInHand[k] = 0
+			break
+		}
+	}
+	log.Println(self.CardsInHand)
+	//self.CardsDiscard.PushFront(card)
+
+	//清除过手胡牌记录
+	self.MissPongCards = []int{}
+	self.MissWinCards = []int{}
+	self.MissWinCardScore = 0
+
+	//给所有人发出牌记录
+	var req = &server_proto.DiscardResponse{}
+	var data []byte
+	for _,player := range self.Table.PlayerDict{
+		if player.Uid == self.Uid {
+			continue
+		}
+		req.Card = int32(card)
+		req.Uuid = self.Uid
+		data = server_proto.MessageEncode( req )
+		global.SERVER.Request(data, "DiscardResponse", "discard_response", player.Uid)
+	}
+}
+

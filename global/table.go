@@ -1,5 +1,8 @@
 package global
 
-import "../machine"
+import (
+	"../teleport"
+)
 
-var GLOBAL_TABLE = make(map[int]*machine.Table)
+
+var SERVER = teleport.New()

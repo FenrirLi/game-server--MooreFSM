@@ -4,6 +4,7 @@ import (
 	"./teleport"
 	"./teleport/debug"
 	"./handlers"
+	"./global"
 )
 
 func main() {
@@ -13,13 +14,14 @@ func main() {
 	serverHandlers := teleport.API{
 		"CreateRoom": new(handlers.CreateRoom),
 		"EnterRoom": new(handlers.EnterRoom),
+		"Discard": new(handlers.Discard),
 
 		teleport.HEARTBEAT : new(handlers.Heartbeat),
 		teleport.IDENTITY : new(handlers.Identity),
 	}
 
 	//启动服务器
-	teleport.New().SetUID("abc").SetAPI( serverHandlers ).Server(":20125")
+	global.SERVER.SetUID("abc").SetAPI( serverHandlers ).Server(":20125")
 
 	select {}
 }

@@ -2,18 +2,16 @@ package machine
 
 type Action struct {
 
-	//行为id
-	Id int
-
-	//权重
-	Weight int
+	//用户行为触发的状态
+	State PlayerState
 
 	//触发动作牌
-	Action_card int
-
-	//规则
-	Rule string
+	ActionCard int
 
 	//手中参照牌
-	Reference_card [] int
+	ReferenceCard [] int
+
+	//行为权重
+	Weight int
+
 }
