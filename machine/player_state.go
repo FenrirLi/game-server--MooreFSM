@@ -151,6 +151,7 @@ func (this *PlayerDrawState) Enter( player *Player ) {
 			break
 		}
 	}
+	log.Println(player.Uid," : ",player.CardsInHand)
 
 	//推送抓牌消息
 	var request = &server_proto.DrawCardResponse{}
@@ -173,8 +174,6 @@ func (this *PlayerDrawState) Exit( player *Player ) {
 func (this *PlayerDrawState) NextState( player *Player ) {
 	log_PlayerState( player, "next", "draw" )
 	player.Machine.Trigger( &PlayerDiscardState{} )
-
-	log.Println("back to draw")
 }
 
 
@@ -186,9 +185,6 @@ func (this *PlayerDiscardState) Enter( player *Player ) {
 	//已经进入出牌步骤，清除之前操作记录
 	player.Table.ClearPrompts()
 	player.Table.ClearActions()
-
-
-	log.Println("discard end")
 }
 func (this *PlayerDiscardState) Execute( player *Player, event string, request_body []byte ) {
 	log_PlayerState( player, "execute", "discard" )
@@ -226,13 +222,20 @@ func (this *PlayerPromptState) Enter( player *Player ) {
 
 	//给玩家发送提示
 	request := &server_proto.ActionPrompt{}
-	action_proto := &server_proto.Action{}
+	//var action_proto server_proto.Action
 	for k,v := range player.ActionDict {
-		action_proto.SelectId = int32(k)
-		action_proto.ActionId = int32(v.ActionId)
-		action_proto.ActionCard = int32(v.ActionCard)
-		action_proto.RefCards = v.ReferenceCard
-		action_proto.Weight = int32(v.Weight)
+		action_proto := &server_proto.Action{
+			int32(k),
+			int32(v.ActionId),
+			int32(v.ActionCard),
+			v.ReferenceCard,
+			int32(v.Weight),
+		}
+		//action_proto.SelectId = int32(k)
+		//action_proto.ActionId = int32(v.ActionId)
+		//action_proto.ActionCard = int32(v.ActionCard)
+		//action_proto.RefCards = v.ReferenceCard
+		//action_proto.Weight = int32(v.Weight)
 		request.Action = append(request.Action, action_proto)
 	}
 	data := server_proto.MessageEncode( request )
@@ -274,7 +277,6 @@ func (this *PlayerPromptState) NextState( player *Player ) {
 	if reflect.DeepEqual( player.Machine.CurrentState, &PlayerWaitState{} ) {
 		player.Machine.BackToLastState()
 	} else {
-
 		log.Println("player prompt execute next")
 		player.Machine.LastState.NextState(player)
 	}
@@ -298,4 +300,30 @@ func (this *PlayerPauseState) Exit( player *Player ) {
 func (this *PlayerPauseState) NextState( player *Player ) {
 	log_PlayerState( player, "next", "pause" )
 	player.Machine.LastState.NextState( player )
+}
+
+//===========================PlayerSettleState===========================
+type PlayerSettleState struct {}
+func (this *PlayerSettleState) Enter( player *Player ) {
+	log_PlayerState( player, "enter", "settle" )
+}
+func (this *PlayerSettleState) Execute( player *Player, event string, request_body []byte ) {
+	log_PlayerState( player, "execute", "settle" )
+	if interface_player_execute( player, event ) {
+		switch event {
+
+			//操作
+			case PlayerEvent["PLAYER_EVENT_READY"] :
+				player.Ready()
+
+			default:
+				log.Println("----- no such event ",event," ----- ")
+		}
+	}
+}
+func (this *PlayerSettleState) Exit( player *Player ) {
+	log_PlayerState( player, "exit", "settle" )
+}
+func (this *PlayerSettleState) NextState( player *Player ) {
+	log_PlayerState( player, "next", "settle" )
 }

@@ -172,10 +172,13 @@ func (self *Table) CheckAllActed() {
 	}
 
 	//选出来的玩家进行操作
+	log.Println("+++操作中+++",max_weight,"   ",action_seats)
 	for _,seat := range action_seats {
 		if player,ok := self.PlayerDict[seat]; ok {
 			action_id := player.Action.ActionId
+			log.Println(action_id)
 			if rule,ok := PlayerActionRule[action_id]; ok {
+				log.Println(reflect.TypeOf(rule).String())
 				rule.Action( player )
 			}
 		}

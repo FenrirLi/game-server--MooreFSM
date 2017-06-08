@@ -28,6 +28,7 @@ func main() {
 		"CreateRoomReturn" : new(ClientHeartBeat),
 		"DiscardResponse" : new(DiscardResponse),
 		"DrawResponse" : new(DrawResponse),
+		"ActionPrompt" : new(ActionPrompt),
 		//teleport.HEARTBEAT : new(ClientHeartBeat),
 		teleport.IDENTITY : new(handlers.Identity),
 	}
@@ -49,8 +50,6 @@ func main() {
 	var inp []byte
 	var data2 []byte
 	var order string
-	var card int
-	var req2 = &server_proto.DiscardRequest{}
 	for running {
 		fmt.Println("please input :")
 		reader := bufio.NewReader(os.Stdin)
@@ -60,12 +59,22 @@ func main() {
 			running = false
 		} else if order == "discard" {
 			inp, _, _ = reader.ReadLine()
-			order = string(inp)
-			card, _ = strconv.Atoi(order)
-			req2.Card = int32(card)
-			data2, _ = proto.Marshal(req2)
+			card_input := string(inp)
+			card, _ := strconv.Atoi(card_input)
+			request := &server_proto.DiscardRequest{
+				int32(card),
+			}
+			data2 = server_proto.MessageEncode( request )
 			tp.Request(data2, "Discard", "discard_flag")
-			log.Println("discard ",card)
+		} else if order == "action" {
+			inp, _, _ = reader.ReadLine()
+			select_id_input := string(inp)
+			select_id, _ := strconv.Atoi(select_id_input)
+			request := &server_proto.ActionSelectRequest{
+				int32(select_id),
+			}
+			data2 = server_proto.MessageEncode( request )
+			tp.Request(data2, "ActionSelect", "action_select")
 		}
 	}
 
@@ -109,5 +118,19 @@ func (*DiscardResponse) Process(receive *teleport.NetData) *teleport.NetData {
 	response := &server_proto.DiscardResponse{}
 	server_proto.MessageDecode( receive.Body, response )
 	log.Println(response.Uuid," discard ",response.Card)
+	return nil
+}
+
+type ActionPrompt struct {}
+func (*ActionPrompt) Process(receive *teleport.NetData) *teleport.NetData {
+
+	log.Println("=============ActionPrompt===============")
+
+	// 进行解码
+	response := &server_proto.ActionPrompt{}
+	server_proto.MessageDecode( receive.Body, response )
+	for _,v := range response.Action {
+		log.Println( v )
+	}
 	return nil
 }

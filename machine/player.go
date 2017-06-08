@@ -171,9 +171,9 @@ func CreatePlayer( uid string, table *Table ) Player {
 	}
 }
 
-//func (self *Player) Ready() {
-//	self.Machine.Trigger( &PlayerReadyState{} )
-//}
+func (self *Player) Ready() {
+	self.Machine.Trigger( &PlayerReadyState{} )
+}
 
 //去除玩家提示信息
 func ( self *Player ) DelPrompt() {
@@ -191,10 +191,12 @@ func ( self *Player ) DelAction() {
 func ( self *Player ) Discard( card int ) {
 	log.Println("      ",self.Uid,"出牌",card)
 	//如果用户是在没有处理操作提示的情况下出的牌
-	if !reflect.DeepEqual( self.Machine.CurrentState, &PlayerPromptState{} ) {
-		self.DelPrompt()
+	if reflect.DeepEqual( self.Machine.CurrentState, &PlayerPromptState{} ) {
+		log.Println("没有处理提示，直接出牌")
+		//self.DelPrompt()
 		self.Table.ClearPrompts()
-		self.Table.Machine.NextState()
+		//立刻处理掉玩家提示状态下的状态切换
+		self.Machine.NextState()
 	}
 
 	//出牌
@@ -206,7 +208,7 @@ func ( self *Player ) Discard( card int ) {
 		}
 	}
 	log.Println(self.CardsInHand)
-	//self.CardsDiscard.PushFront(card)
+	self.CardsDiscard.PushFront(card)
 	self.Table.ActiveCard = card
 
 	//清除过手胡牌记录
@@ -218,9 +220,6 @@ func ( self *Player ) Discard( card int ) {
 	var request = &server_proto.DiscardResponse{}
 	var data []byte
 	for _,player := range self.Table.PlayerDict{
-		if player.Uid == self.Uid {
-			continue
-		}
 		request.Card = int32(card)
 		request.Uuid = self.Uid
 		data = server_proto.MessageEncode( request )
@@ -242,6 +241,7 @@ func ( self *Player ) Discard( card int ) {
 	self.Table.KongStack = false
 	self.Table.KongTriggerSeat = -1
 
+	//他人执行判定后，可能出现操作，因此进入等待状态
 	if len(self.Table.PlayerPrompts) > 0 {
 		self.Machine.Trigger( &PlayerPauseState{} )
 	} else {

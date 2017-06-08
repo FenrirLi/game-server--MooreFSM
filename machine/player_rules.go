@@ -1,5 +1,7 @@
 package machine
 
+import "log"
+
 type PlayerRule interface {
 	//检验条件
 	Condition( player *Player ) bool
@@ -13,6 +15,7 @@ func interface_player_rule_add_prompt( player *Player, action Action ){
 	player.HasPrompt = true
 	player.PromptId += 1
 	player.ActionDict[ player.PromptId ] = action
+
 }
 
 //==================================玩家暗杠====================================
@@ -29,6 +32,7 @@ func (self *PlayerConcealedKongRule) Condition( player *Player ) bool {
 				record[v]++
 			}
 		}
+		log.Println(record)
 		var action = Action{}
 		for k,v := range record {
 			if v == 4 {

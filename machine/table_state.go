@@ -73,13 +73,20 @@ func (this *TableDealState) Enter( table *Table ) {
 	//开始发牌
 	//todo
 	table.CardsRest = list.New()
-	table.CardsRest.PushFront(31)
-	table.CardsRest.PushFront(32)
-	table.CardsRest.PushFront(33)
-	table.CardsRest.PushFront(34)
-	table.CardsRest.PushFront(35)
+	table.CardsRest.PushFront(16)
+	table.CardsRest.PushFront(16)
+	table.CardsRest.PushFront(16)
+	table.CardsRest.PushFront(15)
+	table.CardsRest.PushFront(15)
+	table.CardsRest.PushFront(15)
+	table.CardsRest.PushFront(15)
+	table.CardsRest.PushFront(14)
+	table.CardsRest.PushFront(14)
+	table.CardsRest.PushFront(14)
+	table.CardsRest.PushFront(13)
+	table.CardsRest.PushFront(13)
 	for position, player := range table.PlayerDict {
-		player.CardsInHand = [14]int{11,12,13,14,15,16,17,18,19,11,12,13,14,0}
+		player.CardsInHand = [14]int{11,11,11,11,12,12,12,12,13,13,13,14,14,0}
 		table.PlayerDict[position] = player
 	}
 
@@ -181,6 +188,8 @@ func (this *TableWaitState) NextState( table *Table ) {
 type TableEndState struct{}
 func (this *TableEndState) Enter( table *Table ) {
 	log.Println("===== TABLE ENTER END STATE =====")
+	log.Println("    ====TABLE_RULE_END checking...")
+	TableManagerCondition( table, "TABLE_RULE_END" )
 }
 func (this *TableEndState) Execute( table *Table, event string, request_body []byte) {
 	log.Println("    ====TABLE EXECUTE END STATE")
@@ -191,4 +200,28 @@ func (this *TableEndState) Exit( table *Table ) {
 }
 func (this *TableEndState) NextState( table *Table ) {
 	log.Println("    ====TABLE NEXT END STATE")
+	table.Machine.Trigger( &TableSettleForRoundState{} )
+}
+
+
+//===========================TableSettleForRoundState===========================
+type TableSettleForRoundState struct{}
+func (this *TableSettleForRoundState) Enter( table *Table ) {
+	log.Println("===== TABLE ENTER SETTLE FOR ROUND STATE =====")
+
+
+
+	log.Println("    ====TABLE_RULE_SETTLE_FOR_ROUND checking...")
+	TableManagerCondition( table, "TABLE_RULE_SETTLE_FOR_ROUND" )
+}
+func (this *TableSettleForRoundState) Execute( table *Table, event string, request_body []byte) {
+	log.Println("    ====TABLE EXECUTE SETTLE FOR ROUND STATE")
+	interface_table_execute( table, event )
+}
+func (this *TableSettleForRoundState) Exit( table *Table ) {
+	log.Println("===== TABLE EXIT SETTLE FOR ROUND STATE =====")
+}
+func (this *TableSettleForRoundState) NextState( table *Table ) {
+	log.Println("    ====TABLE NEXT SETTLE FOR ROUND STATE")
+	table.Machine.Trigger( &TableRestartState{} )
 }

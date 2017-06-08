@@ -35,6 +35,12 @@ func (this *PlayerConcealedKongRuleState) Enter( player *Player ) {
 
 		//通知其他玩家杠牌操作
 		//TODO
+
+		//此轮没有人出牌
+		player.Table.DiscardSeat = -1
+
+		//自己进入下一状态
+		player.Machine.NextState()
 	}
 
 }

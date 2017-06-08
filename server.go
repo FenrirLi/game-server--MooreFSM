@@ -15,6 +15,7 @@ func main() {
 		"CreateRoom": new(handlers.CreateRoom),
 		"EnterRoom": new(handlers.EnterRoom),
 		"Discard": new(handlers.Discard),
+		"ActionSelect": new(handlers.ActionSelect),
 
 		teleport.HEARTBEAT : new(handlers.Heartbeat),
 		teleport.IDENTITY : new(handlers.Identity),

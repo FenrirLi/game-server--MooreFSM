@@ -4,7 +4,7 @@ import "log"
 
 var PlayerRulesGroup = map[string][]PlayerRule{
 	"PLAYER_RULE_READY": {},
-	"PLAYER_RULE_DRAW": {},//[DrawConcealedKongRule(), DrawExposedKongRule(), DrawWinRule()],
+	"PLAYER_RULE_DRAW": {&PlayerConcealedKongRule{}},//[DrawConcealedKongRule(), DrawExposedKongRule(), DrawWinRule()],
 	"PLAYER_RULE_DISCARD": {},//[DiscardExposedKongRule(), PongRule(), DiscardWinRule()],
 	"PLAYER_RULE_DEAL": {},
 	//PLAYER_RULE_CHOW: [],
