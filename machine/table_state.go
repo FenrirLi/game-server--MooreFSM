@@ -73,7 +73,11 @@ func (this *TableDealState) Enter( table *Table ) {
 	//开始发牌
 	//todo
 	table.CardsRest = list.New()
-	table.CardsRest.PushFront(21)
+	table.CardsRest.PushFront(31)
+	table.CardsRest.PushFront(32)
+	table.CardsRest.PushFront(33)
+	table.CardsRest.PushFront(34)
+	table.CardsRest.PushFront(35)
 	for position, player := range table.PlayerDict {
 		player.CardsInHand = [14]int{11,12,13,14,15,16,17,18,19,11,12,13,14,0}
 		table.PlayerDict[position] = player

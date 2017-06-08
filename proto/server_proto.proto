@@ -1,27 +1,48 @@
 syntax = "proto3";
 
+//客户端创建房间请求
 message CreateRoomRequest {
     string uuid = 1;
     int32  round = 2;
 }
-
+//服务器创建房间返回
 message CreateRoomResponse {
     int32 room_id = 1;
 }
-
+//客户端进入房间请求
 message EnterRoomRequest {
     int32 room_id = 1;
 }
-
+//服务器进入房间返回
 message EnterRoomResponse {
     int32 room_id = 1;
 }
-
+//服务端抽牌提示
+message DrawCardResponse {
+    int32 card = 1;
+}
+//客户端出牌请求
 message DiscardRequest {
     int32 card = 1;
 }
-
+//服务器出牌广播
 message DiscardResponse {
     string uuid = 1;
     int32 card = 2;
+}
+//服务器操作推送单位
+message Action {
+    int32 select_id = 1;
+    int32 action_id = 2;
+    int32 action_card = 3;
+    repeated int32 ref_cards = 4;
+    int32 weight = 5;
+}
+//服务器操作推送
+message ActionPrompt {
+    repeated Action action = 1;
+}
+//客户端操作选择
+message ActionSelectRequest {
+    int32 select_id = 1;
 }

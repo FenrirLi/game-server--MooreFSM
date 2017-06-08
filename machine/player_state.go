@@ -3,7 +3,8 @@ package machine
 import (
 	"log"
 	"../proto"
-	"github.com/golang/protobuf/proto"
+	"../global"
+	"reflect"
 )
 
 type PlayerState interface {
@@ -102,9 +103,10 @@ func (this *PlayerWaitState) Execute( player *Player, event string, request_body
 	if interface_player_execute( player, event ) {
 		switch event {
 
+			//他人出牌
 			case PlayerEvent["PLAYER_EVENT_OTHER_DISCARD"] :
 				PlayerManagerCondition( player, "PLAYER_RULE_DISCARD" )
-
+			//他人杠牌
 			case PlayerEvent["PLAYER_EVENT_OTHER_KONG"] :
 				PlayerManagerCondition( player, "PLAYER_RULE_KONG" )
 
@@ -139,7 +141,9 @@ func (this *PlayerDrawState) Enter( player *Player ) {
 	//TODO
 
 	//用户抓牌
-	draw_card := player.Table.CardsRest.Front().Value.(int)
+	e := player.Table.CardsRest.Front()
+	player.Table.CardsRest.Remove(e)
+	draw_card := e.Value.(int)
 	player.DrawCard = draw_card
 	for k,v := range player.CardsInHand {
 		if v == 0 {
@@ -149,7 +153,11 @@ func (this *PlayerDrawState) Enter( player *Player ) {
 	}
 
 	//推送抓牌消息
-	//TODO
+	var request = &server_proto.DrawCardResponse{}
+	var data []byte
+	request.Card = int32(draw_card)
+	data = server_proto.MessageEncode( request )
+	global.SERVER.Request(data, "DrawResponse", "draw_response", player.Uid)
 
 	//该状态下规则检测
 	log_PlayerState( player, "PLAYER_RULE_DRAW", "checking..." )
@@ -165,6 +173,8 @@ func (this *PlayerDrawState) Exit( player *Player ) {
 func (this *PlayerDrawState) NextState( player *Player ) {
 	log_PlayerState( player, "next", "draw" )
 	player.Machine.Trigger( &PlayerDiscardState{} )
+
+	log.Println("back to draw")
 }
 
 
@@ -177,9 +187,8 @@ func (this *PlayerDiscardState) Enter( player *Player ) {
 	player.Table.ClearPrompts()
 	player.Table.ClearActions()
 
-	//该状态下规则检测
-	//log_PlayerState( player, "PLAYER_RULE_DISCARD", "checking..." )
-	//PlayerManagerCondition( player, "PLAYER_RULE_DISCARD" )
+
+	log.Println("discard end")
 }
 func (this *PlayerDiscardState) Execute( player *Player, event string, request_body []byte ) {
 	log_PlayerState( player, "execute", "discard" )
@@ -190,10 +199,7 @@ func (this *PlayerDiscardState) Execute( player *Player, event string, request_b
 			case PlayerEvent["PLAYER_EVENT_DISCARD"] :
 				// 进行解码
 				request := &server_proto.DiscardRequest{}
-				err := proto.Unmarshal( request_body, request )
-				if err != nil {
-					log.Fatal("discard request error: ", err)
-				}
+				server_proto.MessageDecode( request_body, request )
 
 				player.Discard( int(request.Card) )
 
@@ -214,20 +220,82 @@ func (this *PlayerDiscardState) NextState( player *Player ) {
 //===========================PlayerPromptState===========================
 type PlayerPromptState struct {}
 func (this *PlayerPromptState) Enter( player *Player ) {
-	log_PlayerState( player, "enter", "discard" )
-	//该状态下规则检测
-	//log_PlayerState( player, "PLAYER_RULE_DISCARD", "checking..." )
-	//PlayerManagerCondition( player, "PLAYER_RULE_DISCARD" )
+	log_PlayerState( player, "enter", "prompt" )
+	//往桌子添加玩家提示记录
+	player.Table.PlayerPrompts = append( player.Table.PlayerPrompts, player.Seat )
+
+	//给玩家发送提示
+	request := &server_proto.ActionPrompt{}
+	action_proto := &server_proto.Action{}
+	for k,v := range player.ActionDict {
+		action_proto.SelectId = int32(k)
+		action_proto.ActionId = int32(v.ActionId)
+		action_proto.ActionCard = int32(v.ActionCard)
+		action_proto.RefCards = v.ReferenceCard
+		action_proto.Weight = int32(v.Weight)
+		request.Action = append(request.Action, action_proto)
+	}
+	data := server_proto.MessageEncode( request )
+	global.SERVER.Request( data, "ActionPrompt","action_prompt_flag", player.Uid )
+
+
 }
 func (this *PlayerPromptState) Execute( player *Player, event string, request_body []byte ) {
-	log_PlayerState( player, "execute", "discard" )
+	log_PlayerState( player, "execute", "prompt" )
+	if interface_player_execute( player, event ) {
+		switch event {
+
+		//操作
+		case PlayerEvent["PLAYER_EVENT_ACTION"] :
+			// 进行解码
+			request := &server_proto.ActionSelectRequest{}
+			server_proto.MessageDecode( request_body, request )
+
+			player.ActionSelect( int(request.SelectId) )
+
+		//出牌
+		case PlayerEvent["PLAYER_EVENT_DISCARD"] :
+			// 进行解码
+			request := &server_proto.DiscardRequest{}
+			server_proto.MessageDecode( request_body, request )
+
+			player.Discard( int(request.Card) )
+
+		default:
+			log.Println("----- no such event ",event," ----- ")
+		}
+	}
+}
+func (this *PlayerPromptState) Exit( player *Player ) {
+	log_PlayerState( player, "exit", "prompt" )
+}
+func (this *PlayerPromptState) NextState( player *Player ) {
+	log_PlayerState( player, "next", "prompt" )
+	if reflect.DeepEqual( player.Machine.CurrentState, &PlayerWaitState{} ) {
+		player.Machine.BackToLastState()
+	} else {
+
+		log.Println("player prompt execute next")
+		player.Machine.LastState.NextState(player)
+	}
+}
+
+
+//===========================PlayerPauseState===========================
+type PlayerPauseState struct {}
+func (this *PlayerPauseState) Enter( player *Player ) {
+	log_PlayerState( player, "enter", "pause" )
+}
+func (this *PlayerPauseState) Execute( player *Player, event string, request_body []byte ) {
+	log_PlayerState( player, "execute", "pause" )
 	if interface_player_execute( player, event ) {
 
 	}
 }
-func (this *PlayerPromptState) Exit( player *Player ) {
-	log_PlayerState( player, "exit", "discard" )
+func (this *PlayerPauseState) Exit( player *Player ) {
+	log_PlayerState( player, "exit", "pause" )
 }
-func (this *PlayerPromptState) NextState( player *Player ) {
-	log_PlayerState( player, "next", "discard" )
+func (this *PlayerPauseState) NextState( player *Player ) {
+	log_PlayerState( player, "next", "pause" )
+	player.Machine.LastState.NextState( player )
 }

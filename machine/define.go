@@ -14,6 +14,38 @@ var PlayerEvent = map[string]string{
 	"PLAYER_EVENT_OTHER_KONG":"PLAYER_EVENT_OTHER_KONG",
 	//出牌
 	"PLAYER_EVENT_DISCARD":"PLAYER_EVENT_DISCARD",
+	//操作
+	"PLAYER_EVENT_ACTION":"PLAYER_EVENT_ACTION",
+}
+
+var PlayerAction = map[string]int{
+	//碰牌
+	"PLAYER_ACTION_PONG":1,
+	//暗杠
+	"PLAYER_ACTION_KONG_CONCEALED":2,
+	//明杠
+	"PLAYER_ACTION_KONG_EXPOSED":3,
+	//过路杠
+	"PLAYER_ACTION_KONG_PONG":4,
+	//自摸
+	"PLAYER_ACTION_WIN_DRAW":5,
+	//点炮胡
+	"PLAYER_ACTION_WIN_DISCARD":6,
+}
+
+var PlayerActionRule = map[int]PlayerRule{
+	//碰牌
+	//1:{},
+	//暗杠
+	2:&PlayerConcealedKongRule{},
+	//明杠
+	//3:{},
+	//过路杠
+	//4:{},
+	//自摸
+	//5:{},
+	//点炮胡
+	//6:{},
 }
 
 var TableEvent = map[string]string{
@@ -25,7 +57,7 @@ var TableEvent = map[string]string{
 	"TABLE_EVENT_END":"TABLE_EVENT_END",
 }
 
-var Card = map[int]string{
+var Cards = map[int]string{
 	1:"东风",
 	2:"西风",
 	3:"南风",
@@ -63,4 +95,10 @@ var Card = map[int]string{
 	37:"7万",
 	38:"8万",
 	39:"9万",
+}
+
+var WinTypes = map[string]int{
+	"WIN_DISCARD_ONE":1,
+	"WIN_DISCARD_MORE":2,
+	"WIN_DRAW":3,
 }

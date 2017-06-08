@@ -2,7 +2,7 @@ package machine
 
 import "log"
 
-var PlayerRulesGroup = map[string][]PlayerRules{
+var PlayerRulesGroup = map[string][]PlayerRule{
 	"PLAYER_RULE_READY": {},
 	"PLAYER_RULE_DRAW": {},//[DrawConcealedKongRule(), DrawExposedKongRule(), DrawWinRule()],
 	"PLAYER_RULE_DISCARD": {},//[DiscardExposedKongRule(), PongRule(), DiscardWinRule()],
@@ -14,21 +14,26 @@ var PlayerRulesGroup = map[string][]PlayerRules{
 	//PLAYER_RULE_NIAO: [],
 }
 
-//===========================PlayerRulesManager===========================
-//type PlayerRulesManager struct {}
-func PlayerManagerCondition( player *Player, rule_group string ) bool {
+func PlayerManagerCondition( player *Player, rule_group string ) {
 	//依据检验的组对规则进行遍历
 	if rules_array, ok := PlayerRulesGroup[rule_group]; ok {
+		flag := false
 		for _,rule := range rules_array {
 			//满足规则则进行处理
-			if rule.Condition( *player ) {
-				rule.Action( *player )
+			if rule.Condition( player ) {
+				flag = true
 			}
 		}
+		//规则检验有能够触发的，玩家进入提示状态
+		if flag {
+			player.Machine.Trigger( &PlayerPromptState{} )
+		} else {
+			log.Println("player rule manager next1")
+			player.Machine.CurrentState.NextState( player )
+		}
 	} else {
-		log.Println("Manager : rule_group Not Found")
+		log.Println("Player Manager : rule_group Not Found")
 	}
 
-	player.Machine.CurrentState.NextState( player )
-	return false
+	return
 }

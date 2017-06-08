@@ -187,6 +187,7 @@ func ( self *Player ) DelAction() {
 	self.Action = Action{}
 }
 
+//出牌
 func ( self *Player ) Discard( card int ) {
 	log.Println("      ",self.Uid,"出牌",card)
 	//如果用户是在没有处理操作提示的情况下出的牌
@@ -206,23 +207,94 @@ func ( self *Player ) Discard( card int ) {
 	}
 	log.Println(self.CardsInHand)
 	//self.CardsDiscard.PushFront(card)
+	self.Table.ActiveCard = card
 
 	//清除过手胡牌记录
 	self.MissPongCards = []int{}
 	self.MissWinCards = []int{}
 	self.MissWinCardScore = 0
 
-	//给所有人发出牌记录
-	var req = &server_proto.DiscardResponse{}
+	//给所有人发出牌通知
+	var request = &server_proto.DiscardResponse{}
 	var data []byte
 	for _,player := range self.Table.PlayerDict{
 		if player.Uid == self.Uid {
 			continue
 		}
-		req.Card = int32(card)
-		req.Uuid = self.Uid
-		data = server_proto.MessageEncode( req )
+		request.Card = int32(card)
+		request.Uuid = self.Uid
+		data = server_proto.MessageEncode( request )
 		global.SERVER.Request(data, "DiscardResponse", "discard_response", player.Uid)
 	}
+
+	//用户检测听牌状态
+	//TODO
+
+	//其他玩家执行"他人出牌"判定
+	for k,player := range self.Table.PlayerDict{
+		if player.Uid == self.Uid {
+			continue
+		}
+		player.Machine.CurrentState.Execute( self.Table.PlayerDict[k], PlayerEvent["PLAYER_EVENT_OTHER_DISCARD"], nil )
+	}
+
+	//杠上操作记录清空
+	self.Table.KongStack = false
+	self.Table.KongTriggerSeat = -1
+
+	if len(self.Table.PlayerPrompts) > 0 {
+		self.Machine.Trigger( &PlayerPauseState{} )
+	} else {
+
+		log.Println("self machine next")
+		self.Machine.NextState()
+	}
+
 }
 
+//玩家操作
+func ( self *Player ) ActionSelect( select_id int ) {
+	//选了过
+	if select_id == 0 {
+		log.Println("    ----",self.Uid," PASSED PROMPT----")
+	} else {
+		if action,ok := self.ActionDict[select_id]; ok {
+			self.Action = action
+		} else {
+			log.Println("ERROR: ----NO SUCH PROMPT----")
+		}
+	}
+	self.Table.PlayerActions = append( self.Table.PlayerActions, self.Seat )
+
+	//过掉低优先级操作
+	//TODO
+	//for _,seat := range self.Table.PlayerPrompts {
+	//	//不和自己比较
+	//	if seat == self.Seat {
+	//		continue
+	//	}
+	//	//已经操作完毕的用户跳过
+	//	if player,ok := self.Table.PlayerDict[seat]; ok {
+	//		if player.Action.Weight > 0 {
+	//			continue
+	//		}
+	//		//低优先级的未操作用户过滤掉
+	//		max_weight := 0
+	//		for _,action := range player.ActionDict {
+	//			if action.Weight > max_weight{
+	//				max_weight = action.Weight
+	//			}
+	//		}
+	//		if max_weight < self.Action.Weight {
+	//
+	//		}
+	//	}
+	//}
+
+	//相同优先级处理
+	//TODO
+
+	//桌子判定是否所有人已选择操作完毕
+	self.Table.CheckAllActed()
+
+}

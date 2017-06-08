@@ -2,14 +2,14 @@ package machine
 
 type Action struct {
 
-	//用户行为触发的状态
-	State PlayerState
+	//用户触发的事件
+	ActionId int
 
 	//触发动作牌
 	ActionCard int
 
 	//手中参照牌
-	ReferenceCard [] int
+	ReferenceCard []int32
 
 	//行为权重
 	Weight int

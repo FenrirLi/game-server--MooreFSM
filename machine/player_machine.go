@@ -28,7 +28,7 @@ func (self *PlayerMachine) Trigger( state PlayerState ) {
 }
 
 func (self *PlayerMachine) BackToLastState() {
-
+	self.Trigger(self.LastState)
 }
 
 func (self *PlayerMachine) Execute() {
@@ -36,5 +36,5 @@ func (self *PlayerMachine) Execute() {
 }
 
 func (self *PlayerMachine) NextState() {
-
+	self.CurrentState.NextState( self.Owner )
 }

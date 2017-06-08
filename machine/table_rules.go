@@ -4,23 +4,21 @@ import "log"
 
 type TableRules interface {
 	//检验条件
-	Condition( table Table ) bool
+	Condition( table *Table ) bool
 	//进行处理
-	Action( table Table )
+	Action( table *Table )
 }
 
 //==================================单轮结算====================================
-type SettleForRoundRule struct {}
-func (this *SettleForRoundRule) Condition( table Table ) bool {
+type TableSettleForRoundRule struct {}
+func (self *TableSettleForRoundRule) Condition( table *Table ) bool {
 	return false
 }
-func (this *SettleForRoundRule) Action( table Table ) {
-
-}
+func (self *TableSettleForRoundRule) Action( table *Table ) {}
 
 //==================================流局====================================
-type LiuJuRule struct {}
-func (this *LiuJuRule) Condition( table Table ) bool{
+type TableLiuJuRule struct {}
+func (self *TableLiuJuRule) Condition( table *Table ) bool{
 	if table.CardsRest.Len() == 0 {
 		log.Println("=====rule liuju true=====")
 		return true
@@ -29,6 +27,7 @@ func (this *LiuJuRule) Condition( table Table ) bool{
 		return false
 	}
 }
-func (this *LiuJuRule) Action( table Table ) {
+func (self *TableLiuJuRule) Action( table *Table ) {
 	log.Println("=====rule liuju action=====")
+	table.Machine.Trigger( &TableEndState{} )
 }

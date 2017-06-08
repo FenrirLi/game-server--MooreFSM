@@ -24,6 +24,7 @@ func main() {
 	//注册请求处理函数
 	clientHandlers := teleport.API{
 		"DiscardResponse" : new(DiscardResponse2),
+		"DrawResponse" : new(DrawResponse2),
 		teleport.IDENTITY : new(handlers.Identity),
 	}
 
@@ -62,6 +63,18 @@ func main() {
 	}
 
 	select {}
+}
+
+type DrawResponse2 struct{}
+func (*DrawResponse2) Process(receive *teleport.NetData) *teleport.NetData {
+
+	log.Println("=============DrawResponse===============")
+
+	// 进行解码
+	response := &server_proto.DrawCardResponse{}
+	server_proto.MessageDecode( receive.Body, response )
+	log.Println(" draw ",response.Card)
+	return nil
 }
 
 type DiscardResponse2 struct{}

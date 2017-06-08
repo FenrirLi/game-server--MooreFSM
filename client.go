@@ -27,6 +27,7 @@ func main() {
 	clientHandlers := teleport.API{
 		"CreateRoomReturn" : new(ClientHeartBeat),
 		"DiscardResponse" : new(DiscardResponse),
+		"DrawResponse" : new(DrawResponse),
 		//teleport.HEARTBEAT : new(ClientHeartBeat),
 		teleport.IDENTITY : new(handlers.Identity),
 	}
@@ -85,6 +86,18 @@ func (*ClientHeartBeat) Process(receive *teleport.NetData) *teleport.NetData {
 	data := server_proto.MessageEncode(request)
 
 	return teleport.ReturnData( data, "EnterRoom" )
+}
+
+type DrawResponse struct{}
+func (*DrawResponse) Process(receive *teleport.NetData) *teleport.NetData {
+
+	log.Println("=============DrawResponse===============")
+
+	// 进行解码
+	response := &server_proto.DrawCardResponse{}
+	server_proto.MessageDecode( receive.Body, response )
+	log.Println(" draw ",response.Card)
+	return nil
 }
 
 type DiscardResponse struct{}

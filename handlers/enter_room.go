@@ -33,7 +33,7 @@ func (*EnterRoom) Process(receive *teleport.NetData) *teleport.NetData {
 		player_machine := machine.NewPlayerMachine( &player, &machine.PlayerReadyState{}, nil )
 		player.Machine = &player_machine
 		//记录玩家信息到桌子
-		table.PlayerDict[player.Seat] = player
+		table.PlayerDict[player.Seat] = &player
 		//记录全局用户
 		machine.GLOBAL_USER[player.Uid] = &player
 

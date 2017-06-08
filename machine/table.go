@@ -24,7 +24,7 @@ type Table struct {
 	Config TableConfig
 
 	//玩家
-	PlayerDict map[int] Player
+	PlayerDict map[int] *Player
 
 	//状态机
 	Machine *TableMachine
@@ -51,7 +51,7 @@ type Table struct {
 	PlayerPrompts []int
 
 	//做出行为选择的玩家位置
-	PlayerActions map[int] Action
+	PlayerActions []int
 
 	//牌局记录
 	Replay list.List
@@ -63,16 +63,16 @@ type Table struct {
 	CurRound int
 
 	//赢家
-	WinnerList map[int] bool
+	WinnerList []bool
 
 	//输家
-	LoserList map[int] bool
+	LoserList []bool
 
 	//杠的栈记录
 	KongStack bool
 
 	//放杠人位置
-	KongTrigger_seat int
+	KongTriggerSeat int
 
 	//斗庄
 	DouCard int
@@ -90,9 +90,10 @@ func CreateTable( oid string ) Table {
 		OwnerId: oid,
 		CreateTime: time.Now(),
 		Config: NewTableConfig(),
-		PlayerDict: make(map[int] Player),
+		PlayerDict: make(map[int]*Player),
 		//Replay: *list.New(),
 		CurRound: 0,
+		ActiveSeat:-1,
 	}
 }
 
@@ -132,9 +133,88 @@ func (this *Table) IsAllReady() bool {
 	return true
 }
 
-func (self *Table) IsAllActed() bool {
+func (self *Table) CheckAllActed() {
+	//没有提示
+	if len( self.PlayerPrompts ) == 0 {
+		self.KongStack = false
+		self.KongTriggerSeat = -1
+		//玩家切换到下个状态
+		log.Println("table all check next")
+		self.PlayerDict[ self.ActiveSeat ].Machine.NextState()
+		return
+	}
 
-	return true
+	//还有玩家没有选择操作
+	if len( self.PlayerActions ) < len( self.PlayerPrompts ) {
+		log.Println("not all checked")
+		return
+	}
+	log.Println("all checked")
+	//清除桌子和玩家的提示记录
+	self.ClearPrompts()
+
+	//过滤选择出最高权重的操作
+	max_weight := 0
+	action_seats := []int{}
+	for _,v := range self.PlayerActions {
+		if player,ok := self.PlayerDict[v]; ok {
+			if player.Action.Weight != 0 && player.Action.Weight > max_weight {
+				max_weight = player.Action.Weight
+			}
+		}
+	}
+	for _,v := range self.PlayerActions {
+		if player,ok := self.PlayerDict[v]; ok {
+			if player.Action.Weight == max_weight {
+				action_seats = append( action_seats, v )
+			}
+		}
+	}
+
+	//选出来的玩家进行操作
+	for _,seat := range action_seats {
+		if player,ok := self.PlayerDict[seat]; ok {
+			action_id := player.Action.ActionId
+			if rule,ok := PlayerActionRule[action_id]; ok {
+				rule.Action( player )
+			}
+		}
+	}
+	//清除桌子和玩家的操作记录
+	self.ClearActions()
+
+	//如果是杠牌相关操作，记录"杠"操作记录
+	if max_weight == PlayerAction["PLAYER_ACTION_KONG_CONCEALED"] ||
+		max_weight == PlayerAction["PLAYER_ACTION_KONG_EXPOSED"] ||
+		max_weight == PlayerAction["PLAYER_ACTION_KONG_PONG"] {
+		self.KongStack = true
+	} else {
+		self.KongStack = false
+		self.KongTriggerSeat = -1
+	}
+
+	//如果是胡牌相关操作
+	//自摸
+	if max_weight == PlayerAction["PLAYER_ACTION_WIN_DRAW"] {
+		if len(action_seats) != 1 {
+			log.Fatalln( "Fatal Error : 自摸只可能有一人操作" )
+		} else {
+			self.WinType = WinTypes["WIN_DRAW"]
+		}
+		self.Machine.Trigger( &TableEndState{} )
+	}
+	//点炮胡
+	if max_weight == PlayerAction["PLAYER_ACTION_WIN_DISCARD"] {
+		if len(action_seats) > 1 {
+			self.WinType = WinTypes["WIN_DISCARD_MORE"]
+		} else if len( action_seats ) == 1 {
+			self.WinType= WinTypes["WIN_DISCARD_ONE"]
+		}
+		self.Machine.Trigger( &TableEndState{} )
+	}
+
+
+	return
 }
 
 //清除当前行为提示玩家记录
@@ -147,7 +227,7 @@ func (self *Table) ClearPrompts() {
 
 //清除当前行为选择玩家记录
 func (self *Table) ClearActions() {
-	self.PlayerActions = map[int]Action{}
+	self.PlayerActions = []int{}
 	for _,player := range self.PlayerDict {
 		player.DelAction()
 	}

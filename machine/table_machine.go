@@ -1,7 +1,5 @@
 package machine
 
-import "log"
-
 type TableMachine struct {
 
 	Owner *Table
