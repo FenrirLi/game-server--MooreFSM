@@ -1,16 +1,18 @@
-[TOC]
+有限状态机
+=====
 
-# 有限状态机
-### 基于长连接游戏设计的状态机（以棋牌游戏--麻将为例）
+基于长连接游戏设计的状态机（以棋牌游戏--麻将为例）
 
-###1. 三方库
+------
+
+### 1. 三方库
  teleport ：https://github.com/henrylee2cn/teleport/raw/master/doc/Teleport
 > 本项目使用了teleport作为长连接交互的底层实现，但稍微做了一些修改：
 > 1. 将原有心跳、认证等hander提取出来，与其他请求handler合并成handler包
 > 2. 将原内部请求的请求体改为protobuf的字节流，所有协议使用protobuf3
 
 
-###2. 代码结构
+### 2. 代码结构
     server
     │
     ├─global       一些全局变量
@@ -33,4 +35,4 @@
     ├─proto        protobuf3的协议代码
     └─teleport     长连接交互底层
 
-###3. coding...
+### 3. coding...
