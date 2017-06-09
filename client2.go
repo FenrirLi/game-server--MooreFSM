@@ -22,8 +22,7 @@ func main() {
 
 	//注册请求处理函数
 	clientHandlers := teleport.API{
-		"DiscardResponse" : new(DiscardResponse2),
-		"DrawResponse" : new(DrawResponse2),
+		"ActionResponse" : new(ActionResponse2),
 		"ActionPrompt" : new(ActionPrompt2),
 		teleport.IDENTITY : new(handlers.Identity),
 	}
@@ -67,33 +66,23 @@ func main() {
 			}
 			data2 = server_proto.MessageEncode( request )
 			tp.Request(data2, "ActionSelect", "action_select")
+		} else if order == "ready" {
+			tp.Request(nil, "Ready", "ready_flag")
 		}
 	}
 
 	select {}
 }
 
-type DrawResponse2 struct{}
-func (*DrawResponse2) Process(receive *teleport.NetData) *teleport.NetData {
+type ActionResponse2 struct{}
+func (*ActionResponse2) Process(receive *teleport.NetData) *teleport.NetData {
 
-	log.Println("=============DrawResponse===============")
-
-	// 进行解码
-	response := &server_proto.DrawCardResponse{}
-	server_proto.MessageDecode( receive.Body, response )
-	log.Println(" draw ",response.Card)
-	return nil
-}
-
-type DiscardResponse2 struct{}
-func (*DiscardResponse2) Process(receive *teleport.NetData) *teleport.NetData {
-
-	log.Println("=============DiscardResponse===============")
+	log.Println("=============ActionResponse===============")
 
 	// 进行解码
-	response := &server_proto.DiscardResponse{}
+	response := &server_proto.ActionResponse{}
 	server_proto.MessageDecode( receive.Body, response )
-	log.Println(response.Uuid," discard ",response.Card)
+	log.Println(response.Uuid," ",response.ActionName," ",response.Card)
 	return nil
 }
 

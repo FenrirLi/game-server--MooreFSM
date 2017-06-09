@@ -28,21 +28,29 @@ func interface_table_execute( table *Table, event string ) bool {
 type TableReadyState struct{}
 func (this *TableReadyState) Enter( table *Table ) {
 	log.Println("===== TABLE ENTER READY STATE =====")
-	//定位上下家
-	for seat,player := range table.PlayerDict {
-		//下家
-		next_seat := seat + 1;
-		if  next_seat >= table.Config.Max_chairs {
-			next_seat -= table.Config.Max_chairs
-		}
-		player.NextSeat = next_seat
+	//初始化单轮数据
+	table.InitRound()
+	//如果是第一局，先将玩家上下家定义好
+	if table.CurRound == 1 {
+		//定位上下家
+		for seat, player := range table.PlayerDict {
+			//下家
+			next_seat := seat + 1;
+			if next_seat >= table.Config.MaxChairs {
+				next_seat -= table.Config.MaxChairs
+			}
+			player.NextSeat = next_seat
 
-		//上家
-		prev_seat := seat - 1
-		if  prev_seat < 0 {
-			prev_seat += table.Config.Max_chairs
+			//上家
+			prev_seat := seat - 1
+			if prev_seat < 0 {
+				prev_seat += table.Config.MaxChairs
+			}
+			player.PrevSeat = prev_seat
 		}
-		player.PrevSeat = prev_seat
+	} else {
+		//不是第一局，局数后推，上轮数据清空
+		table.CurRound++
 	}
 	//该状态下规则检测
 	log.Println("    ====TABLE_RULE_READY checking...")
@@ -73,14 +81,6 @@ func (this *TableDealState) Enter( table *Table ) {
 	//开始发牌
 	//todo
 	table.CardsRest = list.New()
-	table.CardsRest.PushFront(16)
-	table.CardsRest.PushFront(16)
-	table.CardsRest.PushFront(16)
-	table.CardsRest.PushFront(15)
-	table.CardsRest.PushFront(15)
-	table.CardsRest.PushFront(15)
-	table.CardsRest.PushFront(15)
-	table.CardsRest.PushFront(14)
 	table.CardsRest.PushFront(14)
 	table.CardsRest.PushFront(14)
 	table.CardsRest.PushFront(13)
@@ -209,7 +209,15 @@ type TableSettleForRoundState struct{}
 func (this *TableSettleForRoundState) Enter( table *Table ) {
 	log.Println("===== TABLE ENTER SETTLE FOR ROUND STATE =====")
 
-
+	//玩家总局数据累计
+	for _, player := range table.PlayerDict {
+		player.ScoreTotal += player.Score
+		player.ScoreKongTotal += player.KongScore
+		player.KongExposedTotal += player.KongExposedCnt
+		player.KongPongTotal += player.KongPongCnt
+		player.KongConcealedTotal += player.KongConcealedCnt
+		player.KongDiscardTotal += player.KongDiscardCnt
+	}
 
 	log.Println("    ====TABLE_RULE_SETTLE_FOR_ROUND checking...")
 	TableManagerCondition( table, "TABLE_RULE_SETTLE_FOR_ROUND" )
@@ -224,4 +232,43 @@ func (this *TableSettleForRoundState) Exit( table *Table ) {
 func (this *TableSettleForRoundState) NextState( table *Table ) {
 	log.Println("    ====TABLE NEXT SETTLE FOR ROUND STATE")
 	table.Machine.Trigger( &TableRestartState{} )
+}
+
+
+//===========================TableSettleForRoomState===========================
+type TableSettleForRoomState struct{}
+func (this *TableSettleForRoomState) Enter( table *Table ) {
+	log.Println("===== TABLE ENTER SETTLE FOR ROOM STATE =====")
+	//广播
+	//TODO
+}
+func (this *TableSettleForRoomState) Execute( table *Table, event string, request_body []byte) {
+	log.Println("    ====TABLE EXECUTE SETTLE FOR ROOM STATE")
+	interface_table_execute( table, event )
+}
+func (this *TableSettleForRoomState) Exit( table *Table ) {
+	log.Println("===== TABLE EXIT SETTLE FOR ROOM STATE =====")
+}
+func (this *TableSettleForRoomState) NextState( table *Table ) {
+	log.Println("    ====TABLE NEXT SETTLE FOR ROOM STATE")
+}
+
+
+//===========================TableRestartState===========================
+type TableRestartState struct{}
+func (this *TableRestartState) Enter( table *Table ) {
+	log.Println("===== TABLE ENTER RESTART STATE =====")
+	for _,p := range table.PlayerDict{
+		log.Println(p)
+	}
+}
+func (this *TableRestartState) Execute( table *Table, event string, request_body []byte) {
+	log.Println("    ====TABLE EXECUTE RESTART STATE")
+	interface_table_execute( table, event )
+}
+func (this *TableRestartState) Exit( table *Table ) {
+	log.Println("===== TABLE EXIT RESTART STATE =====")
+}
+func (this *TableRestartState) NextState( table *Table ) {
+	log.Println("    ====TABLE NEXT RESTART STATE")
 }

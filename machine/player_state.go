@@ -154,11 +154,14 @@ func (this *PlayerDrawState) Enter( player *Player ) {
 	log.Println(player.Uid," : ",player.CardsInHand)
 
 	//推送抓牌消息
-	var request = &server_proto.DrawCardResponse{}
-	var data []byte
-	request.Card = int32(draw_card)
-	data = server_proto.MessageEncode( request )
-	global.SERVER.Request(data, "DrawResponse", "draw_response", player.Uid)
+	request := &server_proto.ActionResponse{
+		player.Uid,
+		int32(draw_card),
+		ClientPlayerAction["DRAW"],
+		[]int32{},
+	}
+	data := server_proto.MessageEncode( request )
+	global.SERVER.Request(data, "ActionResponse", "action_response", player.Uid)
 
 	//该状态下规则检测
 	log_PlayerState( player, "PLAYER_RULE_DRAW", "checking..." )
@@ -231,11 +234,6 @@ func (this *PlayerPromptState) Enter( player *Player ) {
 			v.ReferenceCard,
 			int32(v.Weight),
 		}
-		//action_proto.SelectId = int32(k)
-		//action_proto.ActionId = int32(v.ActionId)
-		//action_proto.ActionCard = int32(v.ActionCard)
-		//action_proto.RefCards = v.ReferenceCard
-		//action_proto.Weight = int32(v.Weight)
 		request.Action = append(request.Action, action_proto)
 	}
 	data := server_proto.MessageEncode( request )

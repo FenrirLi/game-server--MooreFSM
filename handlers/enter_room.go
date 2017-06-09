@@ -30,7 +30,7 @@ func (*EnterRoom) Process(receive *teleport.NetData) *teleport.NetData {
 		//创建玩家,依据桌子房间（桌子）情况分配座位
 		player := machine.CreatePlayer( uid, table )
 		//创建玩家的状态机
-		player_machine := machine.NewPlayerMachine( &player, &machine.PlayerReadyState{}, nil )
+		player_machine := machine.NewPlayerMachine( &player, &machine.PlayerInitState{}, nil )
 		player.Machine = &player_machine
 		//记录玩家信息到桌子
 		table.PlayerDict[player.Seat] = &player
@@ -42,10 +42,10 @@ func (*EnterRoom) Process(receive *teleport.NetData) *teleport.NetData {
 		}
 
 		//是否全部准备
-		if table.IsAllReady() {
-			log.Println("all player are ready for game")
-			table.Machine.Trigger( &machine.TableReadyState{} )
-		}
+		//if table.IsAllReady() {
+		//	log.Println("all player are ready for game")
+		//	table.Machine.Trigger( &machine.TableReadyState{} )
+		//}
 
 	} else {
 		//return teleport.ReturnData(nil,"CreateRoomReturn",receive.From)

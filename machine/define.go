@@ -33,15 +33,34 @@ var PlayerAction = map[string]int{
 	"PLAYER_ACTION_WIN_DISCARD":6,
 }
 
+var ClientPlayerAction = map[string]string {
+	//抓牌
+	"DRAW":"DRAW",
+	//出牌
+	"DISCARD":"DISCARD",
+	//碰牌
+	"PONG":"PONG",
+	//明杠牌
+	"KONG_EXPOSED":"KONG_EXPOSED",
+	//暗杠牌
+	"KONG_CONCEALED":"KONG_CONCEALED",
+	//过路杠牌
+	"KONG_PONG":"KONG_PONG",
+	//自摸胡
+	"WIN_DRAW":"WIN_DRAW",
+	//点炮胡
+	"WIN_DISCARD":"WIN_DISCARD",
+}
+
 var PlayerActionRule = map[int]PlayerRule{
 	//碰牌
-	//1:{},
+	1:&PlayerPongRule{},
 	//暗杠
 	2:&PlayerConcealedKongRule{},
 	//明杠
 	//3:{},
 	//过路杠
-	//4:{},
+	4:&PlayerPongKongRule{},
 	//自摸
 	//5:{},
 	//点炮胡
@@ -49,6 +68,8 @@ var PlayerActionRule = map[int]PlayerRule{
 }
 
 var TableEvent = map[string]string{
+	//等待玩家准备
+	"TABLE_EVENT_WAIT_READY":"TABLE_EVENT_WAIT_READY",
 	//通知坐庄
 	"TABLE_EVENT_PROMPT_DEAL":"TABLE_EVENT_PROMPT_DEAL",
 	//步骤

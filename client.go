@@ -26,8 +26,7 @@ func main() {
 	//注册请求处理函数
 	clientHandlers := teleport.API{
 		"CreateRoomReturn" : new(ClientHeartBeat),
-		"DiscardResponse" : new(DiscardResponse),
-		"DrawResponse" : new(DrawResponse),
+		"ActionResponse" : new(ActionResponse),
 		"ActionPrompt" : new(ActionPrompt),
 		//teleport.HEARTBEAT : new(ClientHeartBeat),
 		teleport.IDENTITY : new(handlers.Identity),
@@ -75,6 +74,8 @@ func main() {
 			}
 			data2 = server_proto.MessageEncode( request )
 			tp.Request(data2, "ActionSelect", "action_select")
+		} else if order == "ready" {
+			tp.Request(nil, "Ready", "ready_flag")
 		}
 	}
 
@@ -97,27 +98,15 @@ func (*ClientHeartBeat) Process(receive *teleport.NetData) *teleport.NetData {
 	return teleport.ReturnData( data, "EnterRoom" )
 }
 
-type DrawResponse struct{}
-func (*DrawResponse) Process(receive *teleport.NetData) *teleport.NetData {
+type ActionResponse struct{}
+func (*ActionResponse) Process(receive *teleport.NetData) *teleport.NetData {
 
-	log.Println("=============DrawResponse===============")
-
-	// 进行解码
-	response := &server_proto.DrawCardResponse{}
-	server_proto.MessageDecode( receive.Body, response )
-	log.Println(" draw ",response.Card)
-	return nil
-}
-
-type DiscardResponse struct{}
-func (*DiscardResponse) Process(receive *teleport.NetData) *teleport.NetData {
-
-	log.Println("=============DiscardResponse===============")
+	log.Println("=============ActionResponse===============")
 
 	// 进行解码
-	response := &server_proto.DiscardResponse{}
+	response := &server_proto.ActionResponse{}
 	server_proto.MessageDecode( receive.Body, response )
-	log.Println(response.Uuid," discard ",response.Card)
+	log.Println(response.Uuid," ",response.ActionName," ",response.Card)
 	return nil
 }
 

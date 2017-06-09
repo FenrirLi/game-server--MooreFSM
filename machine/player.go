@@ -25,9 +25,6 @@ type Player struct {
 	//下一位置
 	NextSeat int
 
-	//当前事件
-	Event string
-
 	//状态机
 	Machine *PlayerMachine
 
@@ -36,10 +33,10 @@ type Player struct {
 
 	//====================================总局数值====================================
 	//总分
-	Total int
+	ScoreTotal int
 
 	//杠动作分
-	KongTotal int
+	ScoreKongTotal int
 
 	//明杠次数
 	KongExposedTotal int
@@ -47,8 +44,11 @@ type Player struct {
 	//暗杠次数
 	KongConcealedTotal int
 
-	//总获得分数
-	WinTotalCnt int
+	//暗杠次数
+	KongPongTotal int
+
+	//放杠次数
+	KongDiscardTotal int
 
 	//自摸胡次数
 	WinDrawCnt int
@@ -145,7 +145,7 @@ func CreatePlayer( uid string, table *Table ) Player {
 	var seat int
 	//查找该用户是不是已经在成员列表
 	flag := false
-	for seat = 0; seat < table.Config.Max_chairs; seat++ {
+	for seat = 0; seat < table.Config.MaxChairs; seat++ {
 		data, ok := table.PlayerDict[seat]
 		if ok && data.Uid == uid {
 			flag = true
@@ -154,7 +154,7 @@ func CreatePlayer( uid string, table *Table ) Player {
 	}
 	//不在成员列表则取最低座位号
 	if !flag {
-		for seat = 0; seat < table.Config.Max_chairs; seat++ {
+		for seat = 0; seat < table.Config.MaxChairs; seat++ {
 			_, ok := table.PlayerDict[seat]
 			if !ok {
 				break
@@ -187,13 +187,71 @@ func ( self *Player ) DelAction() {
 	self.Action = Action{}
 }
 
+//玩家单轮数据重置
+func ( self *Player ) initRound() {
+	//获得分数
+	self.Score = 0
+	//杠动作分
+	self.KongScore = 0
+	//手牌
+	self.CardsInHand = [14]int{}
+	//碰杠牌
+	self.CardsGroup = []int{}
+	//出过的牌
+	self.CardsDiscard = list.New()
+	//可碰的牌
+	self.CardsPong = []int{}
+	//可明杠的牌
+	self.CardsKongExposed = []int{}
+	//可暗杠的牌
+	self.CardsKongConcealed = []int{}
+	//可听的牌
+	self.CardsReadyHand = []int{}
+	//可胡的牌
+	self.CardsWin = []int{}
+	//明杠次数
+	self.KongExposedCnt = 0
+	//暗杠次数
+	self.KongConcealedCnt = 0
+	//过路杠次数
+	self.KongPongCnt = 0
+	//放杠次数
+	self.KongDiscardCnt = 0
+	//听牌提示
+	self.CardsDic = []int{}
+	//漏碰的牌
+	self.MissPongCards = []int{}
+	//漏胡的牌
+	self.MissWinCards = []int{}
+	//过手胡分数
+	self.MissWinCardScore = 0
+	//抓的牌
+	self.DrawCard = 0
+	//过路杠的牌
+	self.DrawKongExposedCard = 0
+	//胡的牌
+	self.WinCard = 0
+	//胡牌类型：点炮 自摸
+	self.WinType = 0
+	//胡牌牌型
+	self.WinFlag = []string{}
+	//是否有提示
+	self.HasPrompt = false
+	//提示自增id
+	self.PromptId = 0
+	//可执行动作集合
+	self.ActionDict = map[int]Action{}
+	//选择的动作
+	self.Action = Action{}
+}
+
 //出牌
 func ( self *Player ) Discard( card int ) {
 	log.Println("      ",self.Uid,"出牌",card)
 	//如果用户是在没有处理操作提示的情况下出的牌
 	if reflect.DeepEqual( self.Machine.CurrentState, &PlayerPromptState{} ) {
 		log.Println("没有处理提示，直接出牌")
-		//self.DelPrompt()
+		//清除桌子提示
 		self.Table.ClearPrompts()
 		//立刻处理掉玩家提示状态下的状态切换
 		self.Machine.NextState()
@@ -217,13 +275,15 @@ func ( self *Player ) Discard( card int ) {
 	self.MissWinCardScore = 0
 
 	//给所有人发出牌通知
-	var request = &server_proto.DiscardResponse{}
-	var data []byte
+	var request = &server_proto.ActionResponse{
+		self.Uid,
+		int32(card),
+		ClientPlayerAction["DISCARD"],
+		[]int32{},
+	}
+	data := server_proto.MessageEncode( request )
 	for _,player := range self.Table.PlayerDict{
-		request.Card = int32(card)
-		request.Uuid = self.Uid
-		data = server_proto.MessageEncode( request )
-		global.SERVER.Request(data, "DiscardResponse", "discard_response", player.Uid)
+		global.SERVER.Request(data, "ActionResponse", "action_response", player.Uid)
 	}
 
 	//用户检测听牌状态

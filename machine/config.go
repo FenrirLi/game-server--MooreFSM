@@ -1,8 +1,12 @@
 package machine
 
 type TableConfig struct {
-	Max_chairs int
+	MaxChairs int
+	MaxRounds int
 }
 func NewTableConfig() TableConfig{
-	return TableConfig{2}
+	return TableConfig{
+		2,
+		2,
+	}
 }

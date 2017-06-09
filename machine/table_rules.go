@@ -12,9 +12,15 @@ type TableRules interface {
 //==================================单轮结算====================================
 type TableSettleForRoundRule struct {}
 func (self *TableSettleForRoundRule) Condition( table *Table ) bool {
-	return false
+	if table.CurRound > table.Config.MaxRounds {
+		return true
+	} else {
+		return false
+	}
 }
-func (self *TableSettleForRoundRule) Action( table *Table ) {}
+func (self *TableSettleForRoundRule) Action( table *Table ) {
+	
+}
 
 //==================================流局====================================
 type TableLiuJuRule struct {}

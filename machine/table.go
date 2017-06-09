@@ -92,7 +92,7 @@ func CreateTable( oid string ) Table {
 		Config: NewTableConfig(),
 		PlayerDict: make(map[int]*Player),
 		//Replay: *list.New(),
-		CurRound: 0,
+		CurRound: 1,
 		ActiveSeat:-1,
 	}
 }
@@ -103,7 +103,15 @@ func (self *Table) Enter() {
 }
 
 func (self *Table) DisMiss() {
-	//TODO
+	//房间进入结算状态，进行相关操作
+	self.Machine.Trigger( &TableSettleForRoomState{} )
+
+	//删除房间内用户
+	for _,v := range self.PlayerDict {
+		delete( GLOBAL_USER, v.Uid )
+	}
+	//删除桌子
+	delete( GLOBAL_TABLE, self.TableId )
 
 }
 
@@ -112,24 +120,50 @@ func (self *Table) InitTable() Table {
 	return *self
 }
 
-func (self *Table) NextRound() Table {
-	//TODO
-	return *self
+func (self *Table) InitRound() {
+	//置为-1，在进入step状态后会取庄家位作为行动人
+	self.ActiveSeat = -1
+	//当前出牌
+	self.ActiveCard = 0
+	//当前出牌位置
+	self.DiscardSeat = -1
+	//获得提示的玩家位置
+	self.PlayerPrompts = []int{}
+	//做出行为选择的玩家位置
+	self.PlayerActions = []int{}
+	//牌局记录
+	self.Replay = *list.New()
+	//胡牌类型：流局，自摸胡，点炮胡，一炮多响
+	self.WinType = 0
+	//赢家
+	self.WinnerList = []bool{}
+	//输家
+	self.LoserList = []bool{}
+	//杠的栈记录
+	self.KongStack = false
+	//放杠人位置
+	self.KongTriggerSeat = -1
+	//玩家重置
+	for _,p := range self.PlayerDict {
+		p.initRound()
+	}
 }
 
-func (this *Table) IsAllReady() bool {
+func (self *Table) IsAllReady() bool {
 	//人未到齐
-	if len( this.PlayerDict ) != this.Config.Max_chairs {
+	if len( self.PlayerDict ) != self.Config.MaxChairs {
 		log.Println("人不齐")
 		return false
 	}
 	//有用户未准备
-	for _,player := range this.PlayerDict {
+	for _,player := range self.PlayerDict {
 		if !reflect.DeepEqual( player.Machine.CurrentState, &PlayerReadyState{} ) {
-			log.Println("未准备")
+			log.Println(player.Uid,"未准备")
 			return false
 		}
 	}
+
+	self.Machine.Trigger( &TableReadyState{} )
 	return true
 }
 

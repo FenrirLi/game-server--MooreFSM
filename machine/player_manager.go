@@ -1,17 +1,18 @@
 package machine
 
-import "log"
+import (
+	"log"
+	"reflect"
+)
 
 var PlayerRulesGroup = map[string][]PlayerRule{
 	"PLAYER_RULE_READY": {},
-	"PLAYER_RULE_DRAW": {&PlayerConcealedKongRule{}},//[DrawConcealedKongRule(), DrawExposedKongRule(), DrawWinRule()],
-	"PLAYER_RULE_DISCARD": {},//[DiscardExposedKongRule(), PongRule(), DiscardWinRule()],
+	"PLAYER_RULE_DRAW": {&PlayerConcealedKongRule{},&PlayerPongKongRule{}},//[DrawWinRule()],
+	"PLAYER_RULE_DISCARD": {&PlayerPongRule{},&PlayerExposedKongRule{}},//[ DiscardWinRule()],
 	"PLAYER_RULE_DEAL": {},
-	//PLAYER_RULE_CHOW: [],
-	//PLAYER_RULE_PONG: [DrawConcealedKongRule(), DrawExposedKongRule()],
+	"PLAYER_RULE_PONG":{&PlayerConcealedKongRule{},&PlayerPongKongRule{}},
 	"PLAYER_RULE_KONG": {}, //[QGWinRule()],
 	//PLAYER_RULE_WIN: [],
-	//PLAYER_RULE_NIAO: [],
 }
 
 func PlayerManagerCondition( player *Player, rule_group string ) {
@@ -21,6 +22,7 @@ func PlayerManagerCondition( player *Player, rule_group string ) {
 		for _,rule := range rules_array {
 			//满足规则则进行处理
 			if rule.Condition( player ) {
+				log.Println("满足",reflect.TypeOf(rule).String())
 				flag = true
 			}
 		}

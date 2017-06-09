@@ -25,10 +25,12 @@ message DrawCardResponse {
 message DiscardRequest {
     int32 card = 1;
 }
-//服务器出牌广播
-message DiscardResponse {
+//服务器操作广播
+message ActionResponse {
     string uuid = 1;
     int32 card = 2;
+    string action_name = 3;
+    repeated int32 ref_cards = 4;
 }
 //服务器操作推送单位
 message Action {
