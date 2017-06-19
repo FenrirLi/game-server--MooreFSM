@@ -3,7 +3,7 @@ package teleport
 
 import (
 	"encoding/json"
-	"github.com/henrylee2cn/teleport/debug"
+	"github.com/FenrirLi/teleport/debug"
 	"log"
 	"time"
 )

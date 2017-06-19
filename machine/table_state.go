@@ -79,14 +79,18 @@ func (this *TableDealState) Enter( table *Table ) {
 	table.DealerSeat = 0
 
 	//开始发牌
-	//todo
 	table.CardsRest = list.New()
-	table.CardsRest.PushFront(14)
-	table.CardsRest.PushFront(14)
-	table.CardsRest.PushFront(13)
-	table.CardsRest.PushFront(13)
+	cards := table.Shuffle()
+	for _,v := range cards {
+		table.CardsRest.PushFront(v)
+	}
 	for position, player := range table.PlayerDict {
-		player.CardsInHand = [14]int{11,11,11,11,12,12,12,12,13,13,13,14,14,0}
+		for i:=1 ; i <= 13 ; i ++ {
+			e := player.Table.CardsRest.Front()
+			player.Table.CardsRest.Remove(e)
+			draw_card := e.Value.(int)
+			player.CardsInHand[i] = draw_card
+		}
 		table.PlayerDict[position] = player
 	}
 

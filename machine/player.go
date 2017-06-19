@@ -259,11 +259,18 @@ func ( self *Player ) Discard( card int ) {
 
 	//出牌
 	self.Table.DiscardSeat = self.Seat
+	flag := false
 	for k,v := range self.CardsInHand {
 		if v == card {
 			self.CardsInHand[k] = 0
+			flag = true
 			break
 		}
+	}
+	//不存在的手牌
+	if( flag == false ) {
+		log.Println("      ERROR:",self.Uid,"没有这张牌",card)
+		return
 	}
 	log.Println(self.CardsInHand)
 	self.CardsDiscard.PushFront(card)

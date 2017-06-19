@@ -1,7 +1,7 @@
 package teleport
 
 import (
-	"github.com/henrylee2cn/teleport/debug"
+	"github.com/FenrirLi/teleport/debug"
 	"log"
 	"net"
 	"time"

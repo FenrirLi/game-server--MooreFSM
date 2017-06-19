@@ -2,7 +2,7 @@ package teleport
 
 import (
 	"encoding/json"
-	"github.com/henrylee2cn/teleport/debug"
+	"github.com/FenrirLi/teleport/debug"
 	"log"
 	"net"
 	"time"
@@ -56,6 +56,8 @@ retry:
 		if err != nil {
 			return
 		}
+
+		log.Printf(" *     客户端 %v 已连接，但尚未验证身份！", self.port)
 		debug.Printf("Debug: 客户端 %v 已连接，但尚未验证身份！", conn.RemoteAddr().String())
 
 		// 开启该连接处理协程(读写两条协程)
