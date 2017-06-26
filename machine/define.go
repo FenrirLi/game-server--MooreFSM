@@ -58,11 +58,11 @@ var PlayerActionRule = map[int]PlayerRule{
 	//暗杠
 	2:&PlayerConcealedKongRule{},
 	//明杠
-	//3:{},
+	3:&PlayerExposedKongRule{},
 	//过路杠
 	4:&PlayerPongKongRule{},
 	//自摸
-	//5:{},
+	5:&PlayerDrawWinRule{},
 	//点炮胡
 	//6:{},
 }
@@ -122,4 +122,10 @@ var WinTypes = map[string]int{
 	"WIN_DISCARD_ONE":1,
 	"WIN_DISCARD_MORE":2,
 	"WIN_DRAW":3,
+}
+
+var Scores = map[string]int{
+	"QI_XIAO_DUI":1,
+	"QING_YI_SE":1,
+	"PONG_PONG_HU":1,
 }

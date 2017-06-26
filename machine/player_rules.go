@@ -156,3 +156,35 @@ func (self *PlayerPongRule) Action( player *Player ) {
 func (self *PlayerPongRule) AddPrompt( player *Player, action Action ) {
 	interface_player_rule_add_prompt( player, action )
 }
+
+
+//==================================玩家自摸胡牌====================================
+type PlayerDrawWinRule struct {}
+func (self *PlayerDrawWinRule) Condition( player *Player ) bool {
+	draw_card := player.DrawCard
+	flag := false
+	for _,v := range player.CardsWin {
+		if v == draw_card {
+			flag = true
+		}
+	}
+	if flag {
+		action := Action{
+			PlayerAction["PLAYER_ACTION_WIN_DRAW"],
+			draw_card,
+			[]int32{},
+			PlayerAction["PLAYER_ACTION_WIN_DRAW"],
+		}
+		self.AddPrompt( player, action )
+		return true
+	} else {
+		return false
+	}
+
+}
+func (self *PlayerDrawWinRule) Action( player *Player ) {
+	player.Machine.Trigger( &PlayerDrawWinRuleState{} )
+}
+func (self *PlayerDrawWinRule) AddPrompt( player *Player, action Action ) {
+	interface_player_rule_add_prompt( player, action )
+}

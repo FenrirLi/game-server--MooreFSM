@@ -63,10 +63,10 @@ type Table struct {
 	CurRound int
 
 	//赢家
-	WinnerList []bool
+	WinnerList []int
 
 	//输家
-	LoserList []bool
+	LoserList []int
 
 	//杠的栈记录
 	KongStack bool
@@ -136,9 +136,9 @@ func (self *Table) InitRound() {
 	//胡牌类型：流局，自摸胡，点炮胡，一炮多响
 	self.WinType = 0
 	//赢家
-	self.WinnerList = []bool{}
+	self.WinnerList = []int{}
 	//输家
-	self.LoserList = []bool{}
+	self.LoserList = []int{}
 	//杠的栈记录
 	self.KongStack = false
 	//放杠人位置
