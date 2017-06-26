@@ -362,3 +362,46 @@ func (this *PlayerDrawWinRuleState) Exit( player *Player ) {
 func (this *PlayerDrawWinRuleState) NextState( player *Player ) {
 	log_PlayerState( player, "next", "PlayerDrawWinRuleState" )
 }
+
+
+//===========================玩家自摸状态操作===========================
+type PlayerDiscardWinRuleState struct {}
+func (this *PlayerDiscardWinRuleState) Enter( player *Player ) {
+	log_PlayerState( player, "enter", "PlayerDiscardWinRuleState" )
+
+	active_card := player.Table.ActiveCard
+
+	//点炮胡记录+1
+	player.WinDiscardCnt += 1
+
+	//记录赢家
+	player.Table.WinnerList = append(player.Table.WinnerList,player.Seat)
+
+	//检测手牌胡牌情况
+	//TODO
+
+	//算分
+	//TODO
+
+	//广播消息
+	var request = &server_proto.ActionResponse{
+		player.Uid,
+		int32(active_card),
+		ClientPlayerAction["WIN_DISCARD"],
+		[]int32{},
+	}
+	data := server_proto.MessageEncode( request )
+	for _,player := range player.Table.PlayerDict{
+		global.SERVER.Request(data, "ActionResponse", "action_response", player.Uid)
+	}
+
+}
+func (this *PlayerDiscardWinRuleState) Execute( player *Player, event string, request_body []byte ) {
+	log_PlayerState( player, "execute", "PlayerDiscardWinRuleState" )
+}
+func (this *PlayerDiscardWinRuleState) Exit( player *Player ) {
+	log_PlayerState( player, "exit", "PlayerDiscardWinRuleState" )
+}
+func (this *PlayerDiscardWinRuleState) NextState( player *Player ) {
+	log_PlayerState( player, "next", "PlayerDiscardWinRuleState" )
+}

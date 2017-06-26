@@ -64,7 +64,7 @@ var PlayerActionRule = map[int]PlayerRule{
 	//自摸
 	5:&PlayerDrawWinRule{},
 	//点炮胡
-	//6:{},
+	6:&PlayerDiscardWinRule{},
 }
 
 var TableEvent = map[string]string{

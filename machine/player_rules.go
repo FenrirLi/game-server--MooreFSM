@@ -188,3 +188,36 @@ func (self *PlayerDrawWinRule) Action( player *Player ) {
 func (self *PlayerDrawWinRule) AddPrompt( player *Player, action Action ) {
 	interface_player_rule_add_prompt( player, action )
 }
+
+
+//==================================玩家点炮胡牌====================================
+type PlayerDiscardWinRule struct {}
+func (self *PlayerDiscardWinRule) Condition( player *Player ) bool {
+	//当前出的牌
+	active_card := player.Table.ActiveCard
+	flag := false
+	for _,v := range player.CardsWin {
+		if v == active_card {
+			flag = true
+		}
+	}
+	if flag {
+		action := Action{
+			PlayerAction["PLAYER_ACTION_WIN_DISCARD"],
+			active_card,
+			[]int32{},
+			PlayerAction["PLAYER_ACTION_WIN_DISCARD"],
+		}
+		self.AddPrompt( player, action )
+		return true
+	} else {
+		return false
+	}
+
+}
+func (self *PlayerDiscardWinRule) Action( player *Player ) {
+	player.Machine.Trigger( &PlayerDiscardWinRuleState{} )
+}
+func (self *PlayerDiscardWinRule) AddPrompt( player *Player, action Action ) {
+	interface_player_rule_add_prompt( player, action )
+}

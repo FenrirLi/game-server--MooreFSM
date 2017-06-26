@@ -103,7 +103,7 @@ type Player struct {
 	KongDiscardCnt int
 
 	//听牌提示
-	CardsDic []int
+	CardsPrompt []int
 
 	//漏碰的牌
 	MissPongCards []int
@@ -218,7 +218,7 @@ func ( self *Player ) initRound() {
 	//放杠次数
 	self.KongDiscardCnt = 0
 	//听牌提示
-	self.CardsDic = []int{}
+	self.CardsPrompt = []int{}
 	//漏碰的牌
 	self.MissPongCards = []int{}
 	//漏胡的牌

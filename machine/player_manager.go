@@ -8,7 +8,7 @@ import (
 var PlayerRulesGroup = map[string][]PlayerRule{
 	"PLAYER_RULE_READY": {},
 	"PLAYER_RULE_DRAW": {&PlayerConcealedKongRule{},&PlayerPongKongRule{},&PlayerDrawWinRule{}},
-	"PLAYER_RULE_DISCARD": {&PlayerPongRule{},&PlayerExposedKongRule{}},//[ DiscardWinRule()],
+	"PLAYER_RULE_DISCARD": {&PlayerPongRule{},&PlayerExposedKongRule{},&PlayerDiscardWinRule{}},
 	"PLAYER_RULE_DEAL": {},
 	"PLAYER_RULE_PONG":{&PlayerConcealedKongRule{},&PlayerPongKongRule{}},
 	"PLAYER_RULE_KONG": {}, //[QGWinRule()],
