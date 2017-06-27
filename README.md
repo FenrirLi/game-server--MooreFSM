@@ -31,8 +31,13 @@
     │   ├─table_machine.go          房间（桌子）状态机
     │   ├─table_manager.go          房间（桌子）行为管理器
     │   ├─table_rules.go            房间（桌子）的检验规则
-    │   └─table_state.go            房间（桌子）的正常流程
+    │   ├─table_state.go            房间（桌子）的正常流程
+    │   └─win_algorithm.go          胡牌的DFS算法
     ├─proto        protobuf3的协议代码
     └─teleport     长连接交互底层
 
-### 3. coding...
+### 3. 说明
+ 使用teleport使本人在初期注重逻辑开发的时候节约了大量时间，但个人感觉teleport不适合跨平台交互，因此后面一些工作将会着重于长连接底层的改写。
+ 另外，目前这套代码仅仅实现了主要逻辑部分，重连、数据落盘、日志整理等都在计划当中。keep coding...
+
+### 4. coding...
