@@ -91,6 +91,7 @@ func (this *TableDealState) Enter( table *Table ) {
 			draw_card := e.Value.(int)
 			player.CardsInHand[i] = draw_card
 		}
+		player.CardsWin = ReadyHand( player.CardsInHand )
 		table.PlayerDict[position] = player
 	}
 
@@ -143,7 +144,7 @@ func (this *TableStepState) Exit( table *Table ) {
 }
 func (this *TableStepState) NextState( table *Table ) {
 	log.Println("    ====TABLE NEXT STEP STATE")
-
+	before_id := table.ActiveSeat
 	//确定当前步骤执行人
 	if table.ActiveSeat >= 0 {
 		table.ActiveSeat = table.PlayerDict[ table.ActiveSeat ].NextSeat
@@ -151,7 +152,7 @@ func (this *TableStepState) NextState( table *Table ) {
 		table.ActiveSeat = table.DealerSeat
 	}
 	active_player := table.PlayerDict[ table.ActiveSeat ]
-
+	log.Println("-------------------",before_id,"-----",table.ActiveSeat,"-----------")
 	//桌子切换状态
 	table.Machine.Trigger( &TableWaitState{} )
 	active_player.Machine.Trigger( &PlayerDrawState{} )

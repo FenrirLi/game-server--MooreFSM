@@ -268,7 +268,7 @@ func ( self *Player ) Discard( card int ) {
 		}
 	}
 	//不存在的手牌
-	if( flag == false ) {
+	if flag == false {
 		log.Println("      ERROR:",self.Uid,"没有这张牌",card)
 		return
 	}
@@ -294,7 +294,7 @@ func ( self *Player ) Discard( card int ) {
 	}
 
 	//用户检测听牌状态
-	//TODO
+	self.CardsWin = ReadyHand( self.CardsInHand )
 
 	//其他玩家执行"他人出牌"判定
 	for k,player := range self.Table.PlayerDict{
@@ -312,8 +312,6 @@ func ( self *Player ) Discard( card int ) {
 	if len(self.Table.PlayerPrompts) > 0 {
 		self.Machine.Trigger( &PlayerPauseState{} )
 	} else {
-
-		log.Println("self machine next")
 		self.Machine.NextState()
 	}
 

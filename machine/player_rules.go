@@ -161,6 +161,7 @@ func (self *PlayerPongRule) AddPrompt( player *Player, action Action ) {
 //==================================玩家自摸胡牌====================================
 type PlayerDrawWinRule struct {}
 func (self *PlayerDrawWinRule) Condition( player *Player ) bool {
+	//如果之前进行了听牌计算，可以直接使用听牌计算的结果判定
 	draw_card := player.DrawCard
 	flag := false
 	for _,v := range player.CardsWin {
@@ -168,6 +169,11 @@ func (self *PlayerDrawWinRule) Condition( player *Player ) bool {
 			flag = true
 		}
 	}
+	//如果听牌结果因为某些原因不存在，则直接判定手牌
+	if !flag {
+		flag = WinCheck( player.CardsInHand )
+	}
+
 	if flag {
 		action := Action{
 			PlayerAction["PLAYER_ACTION_WIN_DRAW"],

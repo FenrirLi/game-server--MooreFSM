@@ -20,6 +20,7 @@ func PlayerManagerCondition( player *Player, rule_group string ) {
 	if rules_array, ok := PlayerRulesGroup[rule_group]; ok {
 		flag := false
 		for _,rule := range rules_array {
+			log.Println("检测",reflect.TypeOf(rule).String())
 			//满足规则则进行处理
 			if rule.Condition( player ) {
 				log.Println("满足",reflect.TypeOf(rule).String())

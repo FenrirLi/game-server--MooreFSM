@@ -58,6 +58,8 @@ func (this *PlayerConcealedKongRuleState) Enter( player *Player ) {
 
 		//去除出牌人记录
 		player.Table.DiscardSeat = -1
+		//当前活动人切换到自己
+		player.Table.ActiveSeat = player.Seat
 
 		//自己进入下一状态
 		player.Machine.NextState()
@@ -204,6 +206,8 @@ func (this *PlayerExposedKongRuleState) Enter( player *Player ) {
 		trigger_player := player.Table.PlayerDict[ player.Table.ActiveSeat ]
 		trigger_player.KongScore -= 3
 		trigger_player.KongDiscardCnt++
+		//放杠人切换到等待状态
+		trigger_player.Machine.Trigger(&PlayerWaitState{})
 
 		//通知其他玩家杠牌操作
 		var request = &server_proto.ActionResponse{
@@ -219,6 +223,8 @@ func (this *PlayerExposedKongRuleState) Enter( player *Player ) {
 
 		//去除出牌人记录
 		player.Table.DiscardSeat = -1
+		//当前活动人切换到自己
+		player.Table.ActiveSeat = player.Seat
 
 		//自己进入下一状态
 		player.Machine.NextState()
